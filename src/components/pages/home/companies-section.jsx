@@ -1,0 +1,43 @@
+'use client';
+
+import React from 'react';
+import Image from 'next/image';
+
+const companies = [
+    { name: 'IKEA', logo: '/companies/ikea.png' },
+    { name: 'Ashley', logo: '/companies/ashley.png' },
+    { name: 'West Elm', logo: '/companies/westelm.png' },
+    { name: 'Crate & Barrel', logo: '/companies/crate.png' },
+    { name: 'Pottery Barn', logo: '/companies/pottery.png' },
+    { name: 'Wayfair', logo: '/companies/wayfair.png' }
+];
+
+const CompaniesSection = () => {
+    return (
+        <section className="py-16 bg-white">
+            <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">Trusted Brands</h2>
+                    <p className="text-gray-600 max-w-2xl mx-auto">
+                        We partner with the world's leading furniture brands to bring you quality and style
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center">
+                    {companies.map((company, index) => (
+                        <div
+                            key={index}
+                            className="flex items-center justify-center p-6 grayscale hover:grayscale-0 transition-all duration-300 hover:scale-110"
+                        >
+                            <div className="text-2xl font-bold text-gray-400 hover:text-[#B88E2F] transition-colors">
+                                {company.name}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+export default CompaniesSection;
