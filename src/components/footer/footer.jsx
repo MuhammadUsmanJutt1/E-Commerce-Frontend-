@@ -1,82 +1,68 @@
-import React from "react";
-import classNames from "classnames";
-import Image from "next/image";
-import { contactInfo, FooterLinks } from "@/components/footer/footer-links";
-import Link from "next/link";
+import React from 'react';
+import Link from 'next/link';
 
-
-const Footer = ({ ...props }) => {
-
-
+export default function Footer() {
     return (
-        <div
-            className={classNames(props.className, "py-[45px] flex  flex-col  bg-black-light px-[24px] lg:py-[50px] lg:px-[150px]")}>
-
-            <div
-                className={"flex flex-col gap-[12px] lg:border-t-[1px] lg:pt-4 border-t-[#1E2C3D] lg:mx-auto lg:w-[1140px]   lg:flex-row"}>
-                <Image src={"/images/logo.png"} alt={"logo"} width={86} height={86}
-                    className={"h-[86px] mx-auto -mt-[85px] lg:mt-0 lg:mx-0 w-[86px] lg:h-[145px] lg:mr-[50px] lg:w-[145px]"} />
-
-
-                <div className={"grid grid-cols-2 lg:grid-cols-3 w-full gap-x-[24px] gap-[12px]"}>
-                    {
-                        FooterLinks.map((footerLinkGroup, index) => (
-                            <div className={"flex flex-col gap-[17px] lg:gap-[19px]"} key={index}>
-                                <p className={"font-[600] text-white text-[18px]"}>
-                                    {footerLinkGroup.label}
-                                </p>
-                                <div className={"flex flex-col gap-[17px] lg:gap-[19px]"}>
-                                    {
-                                        footerLinkGroup.routes.map((route, routeIndex) => (
-                                            <Link key={routeIndex}
-                                                href={route.href}
-                                                className={"typo-button-regular hover:underline text-mic-stroke-gray"}
-                                            >
-                                                {route.label}
-                                            </Link>
-                                        ))
-                                    }
-                                </div>
-                            </div>
-                        ))
-                    }
-
-                    <div
-                        className={"flex flex-col col-span-2 mt-[12px] lg:mt-0 lg:col-span-1  items-center lg:items-start gap-[24px] lg:gap-[12px] lg:justify-between "}>
-                        {
-                            contactInfo.map((info, index) => (
-                                <div key={index}
-                                    className={"flex flex-col items-center lg:items-start max-w-[311.4px] lg:max-w-[346px] gap-[22px] lg:flex-row"}>
-                                    {info.icon}
-                                    <div className={"flex flex-col items-center lg:items-start gap-[6px]"}>
-                                        <p className={"typo-button-regular text-white uppercase"}>
-                                            {info.title}
-                                        </p>
-                                        <p className={"typo-base-semibold text-center lg:text-start text-white"}>
-                                            {info.value}
-                                        </p>
-
-                                    </div>
-                                </div>
-                            ))
-                        }
+        <footer className="bg-white pt-12 pb-8 border-t border-gray-100">
+            <div className="container mx-auto px-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+                    {/* Brand & Address */}
+                    <div className="flex flex-col gap-6">
+                        <h2 className="text-2xl font-bold text-black">Funiro.</h2>
+                        <address className="not-italic text-gray-500 text-sm leading-relaxed">
+                            400 University Drive Suite 200 Coral <br />
+                            Gables, <br />
+                            FL 33134 USA
+                        </address>
                     </div>
 
+                    {/* Links */}
+                    <div className="flex flex-col gap-6">
+                        <h3 className="text-gray-400 font-medium">Links</h3>
+                        <nav className="flex flex-col gap-4 font-medium text-black">
+                            <Link href="/" className="hover:underline">Home</Link>
+                            <Link href="/shop" className="hover:underline">Shop</Link>
+                            <Link href="/about" className="hover:underline">About</Link>
+                            <Link href="/contact" className="hover:underline">Contact</Link>
+                        </nav>
+                    </div>
+
+                    {/* Help */}
+                    <div className="flex flex-col gap-6">
+                        <h3 className="text-gray-400 font-medium">Help</h3>
+                        <nav className="flex flex-col gap-4 font-medium text-black">
+                            <Link href="/payment-options" className="hover:underline">Payment Options</Link>
+                            <Link href="/returns" className="hover:underline">Returns</Link>
+                            <Link href="/privacy-policies" className="hover:underline">Privacy Policies</Link>
+                        </nav>
+                    </div>
+
+                    {/* Newsletter */}
+                    <div className="flex flex-col gap-6">
+                        <h3 className="text-gray-400 font-medium">Newsletter</h3>
+                        <form className="flex flex-wrap gap-4">
+                            <input
+                                type="email"
+                                placeholder="Enter Your Email Address"
+                                className="border-b border-black text-sm py-1 outline-none placeholder:text-gray-400 flex-1 min-w-[200px]"
+                            />
+                            <button
+                                type="submit"
+                                className="border-b border-black text-sm font-medium uppercase py-1 hover:text-gray-600 transition-colors"
+                            >
+                                Subscribe
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
-
+                {/* Copyright */}
+                <div className="border-t border-gray-200 pt-8">
+                    <p className="text-black text-sm">
+                        2023 funiro. All rights reserved
+                    </p>
+                </div>
             </div>
-
-            <div
-                className={"    border-t-[1px] mt-[12px] lg:mt-[50px]  border-t-[#1E2C3D] h-[69px] lg:h-[63px] lg:w-[1140px] lg:mx-auto   flex flex-col"}>
-
-                <p className={"uppercase mt-auto text-center typo-copyrights text-white"}>
-                    Copyright 2025 © All Right Reserved | School of army air defence
-                </p>
-            </div>
-
-        </div>
-    )
+        </footer>
+    );
 }
-
-export default Footer

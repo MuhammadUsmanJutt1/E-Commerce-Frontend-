@@ -10,6 +10,21 @@
   --tertiary: #ffffff;
   --background-primary: #FAF3EA;
   --background-secondary: #FCF8F3;
+
+  /* Dark Mode Colors */
+  --dark-background: #1A1A1A;
+  --dark-surface: #2D2D2D;
+  --dark-foreground: #E5E5E5;
+  --dark-foreground-secondary: #A0A0A0;
+  --dark-border: #404040;
+}
+
+/* Dark mode styles */
+.dark {
+  --background: var(--dark-background);
+  --foreground: var(--dark-foreground);
+  --background-primary: var(--dark-surface);
+  --background-secondary: #252525;
 }
 
 @theme inline {
@@ -37,4 +52,97 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode utility classes */
+.dark {
+  color-scheme: dark;
+}
+
+.dark .bg-white {
+  background-color: #1e1e1e !important;
+}
+
+.dark .text-black {
+  color: #f5f5f5 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: #b0b0b0 !important;
+}
+
+.dark .text-gray-700 {
+  color: #d4d4d4 !important;
+}
+
+.dark .text-gray-900 {
+  color: #f5f5f5 !important;
+}
+
+.dark .border-gray-200,
+.dark .border-gray-100 {
+  border-color: #404040 !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #505050 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #2a2a2a !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #333333 !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #2a2a2a;
+  color: #f5f5f5;
+  border-color: #505050;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: #B88E2F;
+  background-color: #333333;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #888888;
+}
+
+/* Improve card backgrounds in dark mode */
+.dark .bg-\[#F4F5F7\] {
+  background-color: #2a2a2a !important;
+}
+
+/* Better hover states in dark mode */
+.dark button:hover,
+.dark a:hover {
+  transition: all 0.3s ease;
+}
+
+/* Scrollbar styling for dark mode */
+.dark::-webkit-scrollbar {
+  width: 12px;
+}
+
+.dark::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.dark::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 6px;
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+  background: #505050;
 }
