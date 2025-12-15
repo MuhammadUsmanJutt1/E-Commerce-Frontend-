@@ -1,27 +1,24 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, ShoppingCart, Users, ArrowLeft, Mail } from 'lucide-react';
+import { LayoutDashboard, Package, ArrowLeft } from 'lucide-react';
 
-const adminRoutes = [
-    { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-    { name: 'Products', path: '/admin/products', icon: Package },
-    { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
-    { name: 'Customers', path: '/admin/customers', icon: Users },
-    { name: 'Newsletter', path: '/admin/newsletter', icon: Mail },
+const vendorRoutes = [
+    { name: 'Dashboard', path: '/vendor', icon: LayoutDashboard },
+    { name: 'My Products', path: '/vendor/products', icon: Package },
 ];
 
-export default function AdminLayout({ children }) {
+export default function VendorLayout({ children }) {
     const pathname = usePathname();
-    const [sidebarOpen, setSidebarOpen] = React.useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-gray-100 transition-colors duration-300">
             {/* Mobile Header */}
             <div className="md:hidden bg-white p-4 border-b border-gray-200 flex items-center justify-between">
-                <h1 className="text-xl font-bold text-[#B88E2F]">Funiro Admin</h1>
+                <h1 className="text-xl font-bold text-[#B88E2F]">Vendor Panel</h1>
                 <button
                     onClick={() => setSidebarOpen(!sidebarOpen)}
                     className="p-2 rounded-lg hover:bg-gray-100"
@@ -34,7 +31,7 @@ export default function AdminLayout({ children }) {
             <aside className={`fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 transition-transform duration-300 z-50 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 } md:translate-x-0`}>
                 <div className="p-6 flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-[#B88E2F]">Funiro Admin</h1>
+                    <h1 className="text-2xl font-bold text-[#B88E2F]">Vendor Panel</h1>
                     <button
                         onClick={() => setSidebarOpen(false)}
                         className="md:hidden p-2 rounded-lg hover:bg-gray-100"
@@ -52,7 +49,7 @@ export default function AdminLayout({ children }) {
                         <span>Back to Store</span>
                     </Link>
 
-                    {adminRoutes.map((route) => {
+                    {vendorRoutes.map((route) => {
                         const Icon = route.icon;
                         const isActive = pathname === route.path;
 

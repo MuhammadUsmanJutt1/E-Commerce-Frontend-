@@ -1,0 +1,66 @@
+import axios from 'axios';
+
+const API_URL = 'http://localhost:3001';
+
+const api = axios.create({
+    baseURL: API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
+
+// Request interceptor to add auth token
+api.interceptors.request.use((config) => {
+    // We'll use localStorage for now, but AuthContext will manage this better
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+    }
+    return config;
+});
+
+// Response interceptor for token refresh
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        // If error is 401 and we haven't tried to refresh yet
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            try {
+                const refreshToken = localStorage.getItem('refreshToken');
+                if (!refreshToken) {
+                    throw new Error('No refresh token');
+                }
+
+                const response = await axios.post(`${API_URL}/auth/refresh`, {
+                    refreshToken,
+                });
+
+                const { accessToken } = response.data;
+                localStorage.setItem('accessToken', accessToken);
+
+                // Update the header for the original request
+                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                return api(originalRequest);
+            } catch (refreshError) {
+                // If refresh fails, logout
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                // Redirect to login if needed, or let the app handle it
+                if (typeof window !== 'undefined') {
+                    // window.location.href = '/login'; // Optional: force redirect
+                }
+                return Promise.reject(refreshError);
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+export default api;

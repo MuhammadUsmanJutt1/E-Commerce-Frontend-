@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { User, Search, Heart, ShoppingCart, Menu, X } from "lucide-react";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 const routes = [
     { name: "Home", link: "/" },
@@ -20,6 +21,7 @@ const Navbar = ({ ...props }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const router = useRouter();
     const { getCartCount, setIsCartOpen } = useCart();
+    const { user, logout } = useAuth();
     const cartCount = getCartCount();
 
     const isRouteActive = (link) => pathname === link;
@@ -61,9 +63,39 @@ const Navbar = ({ ...props }) => {
 
                     {/* Icons */}
                     <div className="hidden md:flex items-center gap-6">
-                        <Link href="/login" className="p-2 rounded-full text-black hover:text-[#B88E2F] hover:bg-gray-100 transition-all duration-300">
-                            <User size={22} />
-                        </Link>
+                        {user ? (
+                            <div className="relative group">
+                                <button className="flex items-center gap-2 text-black hover:text-[#B88E2F] transition-all duration-300">
+                                    <User size={22} />
+                                    <span className="font-medium text-sm">{user.name}</span>
+                                </button>
+                                {/* Dropdown */}
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-gray-100">
+                                    <div className="px-4 py-2 border-b border-gray-100">
+                                        <p className="text-sm font-semibold text-gray-900">{user.name}</p>
+                                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                                    </div>
+                                    <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#B88E2F]">
+                                        My Profile
+                                    </Link>
+                                    {user.role === 'admin' && (
+                                        <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#B88E2F]">
+                                            Admin Dashboard
+                                        </Link>
+                                    )}
+                                    <button
+                                        onClick={logout}
+                                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <Link href="/login" className="p-2 rounded-full text-black hover:text-[#B88E2F] hover:bg-gray-100 transition-all duration-300">
+                                <User size={22} />
+                            </Link>
+                        )}
                         <button className="p-2 rounded-full text-black hover:text-[#B88E2F] hover:bg-gray-100 transition-all duration-300">
                             <Search size={22} />
                         </button>

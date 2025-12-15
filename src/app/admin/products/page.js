@@ -5,6 +5,7 @@ import Link from 'next/link';
 import AdminLayout from '@/components/admin/admin-layout';
 import { useProducts } from '@/context/ProductsContext';
 import { Plus, Edit, Trash2, Search, Package } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AdminProductsPage() {
     const { products, deleteProduct } = useProducts();
@@ -68,11 +69,19 @@ export default function AdminProductsPage() {
                                     <tr key={product.id} className="border-t border-gray-200 hover:bg-gray-50">
                                         <td className="py-4 px-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden">
-                                                    {/* Placeholder for product image */}
-                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                        <Package size={20} />
-                                                    </div>
+                                                <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden relative">
+                                                    {product.image ? (
+                                                        <Image
+                                                            src={product.image}
+                                                            alt={product.title}
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                            <Package size={20} />
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <div>
                                                     <p className="font-medium text-gray-900">{product.title}</p>

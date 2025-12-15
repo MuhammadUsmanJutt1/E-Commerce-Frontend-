@@ -6,6 +6,7 @@ import Navbar from '@/components/nav-bar/nav-bar';
 import Footer from '@/components/footer/footer';
 import Breadcrumb from '@/components/pages/common/breadcrumb';
 import { useCart } from '@/context/CartContext';
+import api from '@/lib/api';
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -30,13 +31,32 @@ export default function CheckoutPage() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: Implement order placement
-        console.log('Order placed:', formData);
-        clearCart();
-        router.push('/');
-        alert('Order placed successfully!');
+        try {
+            await api.post('/orders', {
+                shippingAddress: {
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    companyName: formData.companyName,
+                    country: formData.country,
+                    streetAddress: formData.streetAddress,
+                    city: formData.city,
+                    province: formData.province,
+                    zipCode: formData.zipCode,
+                    phone: formData.phone,
+                    email: formData.email
+                },
+                additionalInfo: formData.additionalInfo,
+                paymentMethod: formData.paymentMethod
+            });
+            clearCart();
+            router.push('/');
+            alert('Order placed successfully!');
+        } catch (error) {
+            console.error('Order failed:', error);
+            alert(error.response?.data?.message || 'Failed to place order. Please make sure you are logged in.');
+        }
     };
 
     const shipping = 0;

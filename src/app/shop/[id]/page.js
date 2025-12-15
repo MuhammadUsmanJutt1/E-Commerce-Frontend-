@@ -15,7 +15,7 @@ import { Star, Facebook, Linkedin, Twitter, ChevronRight } from 'lucide-react';
 export default function SingleProductPage() {
     const params = useParams();
     const router = useRouter();
-    const { getProductById, products } = useProducts();
+    const { getProductById, products, loading } = useProducts();
     const { addToCart } = useCart();
 
     const product = getProductById(params.id);
@@ -24,6 +24,14 @@ export default function SingleProductPage() {
     const [selectedColor, setSelectedColor] = useState('Purple');
     const [activeTab, setActiveTab] = useState('description');
     const [selectedImage, setSelectedImage] = useState(0);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#B88E2F]"></div>
+            </div>
+        );
+    }
 
     if (!product) {
         return (

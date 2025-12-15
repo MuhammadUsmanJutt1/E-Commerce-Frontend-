@@ -3,20 +3,31 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
     const router = useRouter();
+    const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         rememberMe: false
     });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: Implement actual authentication
-        console.log('Login:', formData);
-        router.push('/');
+        setError('');
+        setLoading(true);
+
+        const result = await login(formData.email, formData.password);
+
+        if (!result.success) {
+            setError(result.error);
+            setLoading(false);
+        }
+        // If success, redirect is handled in AuthContext
     };
 
     const handleChange = (e) => {
@@ -34,6 +45,12 @@ export default function LoginPage() {
                     <h1 className="text-4xl font-bold text-[#3A3A3A] mb-2">Welcome Back</h1>
                     <p className="text-[#898989]">Login to your account</p>
                 </div>
+
+                {error && (
+                    <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-6 text-sm text-center">
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Email */}
@@ -90,9 +107,10 @@ export default function LoginPage() {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        className="w-full bg-[#B88E2F] text-white py-3 rounded-lg font-semibold hover:bg-[#9F7A28] transition-colors duration-300"
+                        disabled={loading}
+                        className="w-full bg-[#B88E2F] text-white py-3 rounded-lg font-semibold hover:bg-[#9F7A28] transition-colors duration-300 disabled:opacity-50"
                     >
-                        Login
+                        {loading ? 'Logging in...' : 'Login'}
                     </button>
 
                     {/* Sign Up Link */}

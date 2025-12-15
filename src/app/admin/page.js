@@ -4,6 +4,7 @@ import React from 'react';
 import AdminLayout from '@/components/admin/admin-layout';
 import { useProducts } from '@/context/ProductsContext';
 import { Package, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AdminDashboard() {
     const { products } = useProducts();
@@ -84,7 +85,16 @@ export default function AdminDashboard() {
                                     <tr key={product.id} className="border-b border-gray-100">
                                         <td className="py-3 px-4">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gray-200 rounded"></div>
+                                                <div className="w-10 h-10 bg-gray-200 rounded overflow-hidden relative">
+                                                    {product.image && (
+                                                        <Image
+                                                            src={product.image}
+                                                            alt={product.title}
+                                                            fill
+                                                            className="object-cover"
+                                                        />
+                                                    )}
+                                                </div>
                                                 <span className="text-sm text-gray-900">{product.title}</span>
                                             </div>
                                         </td>

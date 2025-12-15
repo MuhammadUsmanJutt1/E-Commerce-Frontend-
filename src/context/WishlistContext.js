@@ -1,48 +1,104 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
+import api from '@/lib/api';
 
 const WishlistContext = createContext();
 
 export function WishlistProvider({ children }) {
+    const { user } = useAuth();
     const [wishlist, setWishlist] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    // Load wishlist from localStorage on mount
+    // Load wishlist from API if user is logged in, else from localStorage
     useEffect(() => {
-        const savedWishlist = localStorage.getItem('wishlist');
-        if (savedWishlist) {
-            setWishlist(JSON.parse(savedWishlist));
-        }
-    }, []);
-
-    // Save wishlist to localStorage whenever it changes
-    useEffect(() => {
-        localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    }, [wishlist]);
-
-    const addToWishlist = (product) => {
-        setWishlist(prev => {
-            const exists = prev.find(item => item.id === product.id);
-            if (exists) {
-                return prev;
+        if (user) {
+            fetchWishlist();
+        } else {
+            const savedWishlist = localStorage.getItem('wishlist');
+            if (savedWishlist) {
+                setWishlist(JSON.parse(savedWishlist));
+            } else {
+                setWishlist([]);
             }
-            return [...prev, product];
-        });
+        }
+    }, [user]);
+
+    // Save to localStorage if user is NOT logged in
+    useEffect(() => {
+        if (!user) {
+            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        }
+    }, [wishlist, user]);
+
+    const fetchWishlist = async () => {
+        try {
+            setLoading(true);
+            const { data } = await api.get('/wishlist');
+            // Map backend products to frontend structure
+            const mappedProducts = data.products.map(product => ({
+                ...product,
+                id: product._id
+            }));
+            setWishlist(mappedProducts);
+        } catch (error) {
+            console.error('Error fetching wishlist:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const removeFromWishlist = (productId) => {
-        setWishlist(prev => prev.filter(item => item.id !== productId));
+    const addToWishlist = async (product) => {
+        if (user) {
+            try {
+                await api.post('/wishlist/toggle', { productId: product.id });
+                await fetchWishlist();
+            } catch (error) {
+                console.error('Error adding to wishlist:', error);
+            }
+        } else {
+            setWishlist(prev => {
+                const exists = prev.find(item => item.id === product.id);
+                if (exists) {
+                    return prev;
+                }
+                return [...prev, product];
+            });
+        }
+    };
+
+    const removeFromWishlist = async (productId) => {
+        if (user) {
+            try {
+                await api.delete(`/wishlist/${productId}`);
+                await fetchWishlist();
+            } catch (error) {
+                console.error('Error removing from wishlist:', error);
+            }
+        } else {
+            setWishlist(prev => prev.filter(item => item.id !== productId));
+        }
     };
 
     const isInWishlist = (productId) => {
         return wishlist.some(item => item.id === productId);
     };
 
-    const toggleWishlist = (product) => {
-        if (isInWishlist(product.id)) {
-            removeFromWishlist(product.id);
+    const toggleWishlist = async (product) => {
+        if (user) {
+            try {
+                await api.post('/wishlist/toggle', { productId: product.id });
+                await fetchWishlist();
+            } catch (error) {
+                console.error('Error toggling wishlist:', error);
+            }
         } else {
-            addToWishlist(product);
+            if (isInWishlist(product.id)) {
+                removeFromWishlist(product.id);
+            } else {
+                addToWishlist(product);
+            }
         }
     };
 
@@ -53,7 +109,8 @@ export function WishlistProvider({ children }) {
                 addToWishlist,
                 removeFromWishlist,
                 isInWishlist,
-                toggleWishlist
+                toggleWishlist,
+                loading
             }}
         >
             {children}

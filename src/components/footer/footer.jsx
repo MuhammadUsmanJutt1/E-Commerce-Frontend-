@@ -1,5 +1,57 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
+import api from '@/lib/api';
+
+function NewsletterForm() {
+    const [email, setEmail] = useState('');
+    const [status, setStatus] = useState('idle'); // idle, loading, success, error
+    const [message, setMessage] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!email) return;
+
+        setStatus('loading');
+        try {
+            await api.post('/newsletter/subscribe', { email });
+            setStatus('success');
+            setMessage('Subscribed successfully!');
+            setEmail('');
+        } catch (error) {
+            setStatus('error');
+            setMessage(error.response?.data?.message || 'Failed to subscribe');
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+            <div className="flex flex-wrap gap-4">
+                <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter Your Email Address"
+                    className="border-b border-black text-sm py-1 outline-none placeholder:text-gray-400 flex-1 min-w-[200px]"
+                    disabled={status === 'loading'}
+                />
+                <button
+                    type="submit"
+                    disabled={status === 'loading'}
+                    className="border-b border-black text-sm font-medium uppercase py-1 hover:text-gray-600 transition-colors disabled:opacity-50"
+                >
+                    {status === 'loading' ? '...' : 'Subscribe'}
+                </button>
+            </div>
+            {message && (
+                <p className={`text-xs ${status === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                    {message}
+                </p>
+            )}
+        </form>
+    );
+}
 
 export default function Footer() {
     return (
@@ -40,19 +92,7 @@ export default function Footer() {
                     {/* Newsletter */}
                     <div className="flex flex-col gap-6">
                         <h3 className="text-gray-400 font-medium">Newsletter</h3>
-                        <form className="flex flex-wrap gap-4">
-                            <input
-                                type="email"
-                                placeholder="Enter Your Email Address"
-                                className="border-b border-black text-sm py-1 outline-none placeholder:text-gray-400 flex-1 min-w-[200px]"
-                            />
-                            <button
-                                type="submit"
-                                className="border-b border-black text-sm font-medium uppercase py-1 hover:text-gray-600 transition-colors"
-                            >
-                                Subscribe
-                            </button>
-                        </form>
+                        <NewsletterForm />
                     </div>
                 </div>
 

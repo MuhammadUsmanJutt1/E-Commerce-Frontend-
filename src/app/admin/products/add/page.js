@@ -6,6 +6,7 @@ import AdminLayout from '@/components/admin/admin-layout';
 import { useProducts } from '@/context/ProductsContext';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import api from '@/lib/api';
 
 export default function AddProductPage() {
     const router = useRouter();
@@ -26,6 +27,9 @@ export default function AddProductPage() {
 
     const categories = ['Chairs', 'Sofas', 'Tables', 'Beds', 'Storage'];
 
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(formData.image);
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
@@ -34,19 +38,44 @@ export default function AddProductPage() {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const productData = {
-            ...formData,
-            price: parseInt(formData.price),
-            originalPrice: formData.originalPrice ? parseInt(formData.originalPrice) : undefined,
-            discount: formData.discount ? parseInt(formData.discount) : undefined,
-            stock: parseInt(formData.stock)
-        };
+        try {
+            let imageUrl = formData.image;
 
-        addProduct(productData);
-        router.push('/admin/products');
+            if (selectedFile) {
+                const uploadFormData = new FormData();
+                uploadFormData.append('file', selectedFile);
+                const { data } = await api.post('/products/upload', uploadFormData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                imageUrl = data.url;
+            }
+
+            const productData = {
+                ...formData,
+                image: imageUrl,
+                price: parseInt(formData.price),
+                originalPrice: formData.originalPrice ? parseInt(formData.originalPrice) : undefined,
+                discount: formData.discount ? parseInt(formData.discount) : undefined,
+                stock: parseInt(formData.stock)
+            };
+
+            await addProduct(productData);
+            router.push('/admin/products');
+        } catch (error) {
+            console.error('Failed to add product:', error);
+            alert('Failed to add product');
+        }
     };
 
     return (
@@ -188,6 +217,45 @@ export default function AddProductPage() {
                                 min="0"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#B88E2F]"
                             />
+                        </div>
+
+                        {/* Image Upload */}
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Product Image
+                            </label>
+                            <div className="flex items-start gap-6">
+                                <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden relative border border-gray-200">
+                                    {previewUrl ? (
+                                        <img
+                                            src={previewUrl}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex items-center justify-center h-full text-gray-400">
+                                            No Image
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="block w-full text-sm text-gray-500
+                                            file:mr-4 file:py-2 file:px-4
+                                            file:rounded-full file:border-0
+                                            file:text-sm file:font-semibold
+                                            file:bg-[#B88E2F] file:text-white
+                                            hover:file:bg-[#9F7A28]
+                                        "
+                                    />
+                                    <p className="mt-2 text-sm text-gray-500">
+                                        Upload a product image. Supported formats: JPG, PNG, WEBP.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Checkboxes */}

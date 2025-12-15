@@ -1,59 +1,134 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
+import api from '@/lib/api';
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
+    const { user } = useAuth();
     const [cartItems, setCartItems] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    // Load cart from localStorage on mount
+    // Load cart from API if user is logged in, else from localStorage
     useEffect(() => {
-        const savedCart = localStorage.getItem('cart');
-        if (savedCart) {
-            setCartItems(JSON.parse(savedCart));
-        }
-    }, []);
-
-    // Save cart to localStorage whenever it changes
-    useEffect(() => {
-        localStorage.setItem('cart', JSON.stringify(cartItems));
-    }, [cartItems]);
-
-    const addToCart = (product, quantity = 1) => {
-        setCartItems(prev => {
-            const existingItem = prev.find(item => item.id === product.id);
-            if (existingItem) {
-                return prev.map(item =>
-                    item.id === product.id
-                        ? { ...item, quantity: item.quantity + quantity }
-                        : item
-                );
+        if (user) {
+            fetchCart();
+        } else {
+            const savedCart = localStorage.getItem('cart');
+            if (savedCart) {
+                setCartItems(JSON.parse(savedCart));
+            } else {
+                setCartItems([]);
             }
-            return [...prev, { ...product, quantity }];
-        });
-        setIsCartOpen(true);
+        }
+    }, [user]);
+
+    // Save to localStorage if user is NOT logged in
+    useEffect(() => {
+        if (!user) {
+            localStorage.setItem('cart', JSON.stringify(cartItems));
+        }
+    }, [cartItems, user]);
+
+    const fetchCart = async () => {
+        try {
+            setLoading(true);
+            const { data } = await api.get('/cart');
+            // Map backend structure to frontend structure
+            // Backend: { items: [{ product: {...}, quantity, price }] }
+            // Frontend: [{ ...product, quantity }]
+            const mappedItems = data.items.map(item => ({
+                ...item.product,
+                id: item.product._id, // Ensure ID is mapped
+                quantity: item.quantity
+            }));
+            setCartItems(mappedItems);
+        } catch (error) {
+            console.error('Error fetching cart:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const removeFromCart = (productId) => {
-        setCartItems(prev => prev.filter(item => item.id !== productId));
+    const addToCart = async (product, quantity = 1) => {
+        if (user) {
+            try {
+                await api.post('/cart/items', {
+                    productId: product.id,
+                    quantity
+                });
+                await fetchCart(); // Refresh cart from server
+                setIsCartOpen(true);
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                alert('Failed to add to cart');
+            }
+        } else {
+            // Local storage fallback
+            setCartItems(prev => {
+                const existingItem = prev.find(item => item.id === product.id);
+                if (existingItem) {
+                    return prev.map(item =>
+                        item.id === product.id
+                            ? { ...item, quantity: item.quantity + quantity }
+                            : item
+                    );
+                }
+                return [...prev, { ...product, quantity }];
+            });
+            setIsCartOpen(true);
+        }
     };
 
-    const updateQuantity = (productId, quantity) => {
+    const removeFromCart = async (productId) => {
+        if (user) {
+            try {
+                await api.delete(`/cart/items/${productId}`);
+                await fetchCart();
+            } catch (error) {
+                console.error('Error removing from cart:', error);
+            }
+        } else {
+            setCartItems(prev => prev.filter(item => item.id !== productId));
+        }
+    };
+
+    const updateQuantity = async (productId, quantity) => {
         if (quantity <= 0) {
             removeFromCart(productId);
             return;
         }
-        setCartItems(prev =>
-            prev.map(item =>
-                item.id === productId ? { ...item, quantity } : item
-            )
-        );
+
+        if (user) {
+            try {
+                await api.patch(`/cart/items/${productId}`, { quantity });
+                await fetchCart();
+            } catch (error) {
+                console.error('Error updating cart quantity:', error);
+            }
+        } else {
+            setCartItems(prev =>
+                prev.map(item =>
+                    item.id === productId ? { ...item, quantity } : item
+                )
+            );
+        }
     };
 
-    const clearCart = () => {
-        setCartItems([]);
+    const clearCart = async () => {
+        if (user) {
+            try {
+                await api.delete('/cart');
+                setCartItems([]);
+            } catch (error) {
+                console.error('Error clearing cart:', error);
+            }
+        } else {
+            setCartItems([]);
+        }
     };
 
     const getCartTotal = () => {
@@ -75,7 +150,8 @@ export function CartProvider({ children }) {
                 getCartTotal,
                 getCartCount,
                 isCartOpen,
-                setIsCartOpen
+                setIsCartOpen,
+                loading
             }}
         >
             {children}

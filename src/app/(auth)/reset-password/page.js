@@ -1,25 +1,45 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import api from '@/lib/api';
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const email = searchParams.get('email');
+
     const [formData, setFormData] = useState({
+        otp: '',
         password: '',
         confirmPassword: ''
     });
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.password !== formData.confirmPassword) {
             alert('Passwords do not match!');
             return;
         }
-        // TODO: Implement password reset
-        console.log('Reset password');
-        router.push('/login');
+
+        setLoading(true);
+        try {
+            await api.post('/auth/reset-password', {
+                email,
+                otp: formData.otp,
+                password: formData.password,
+                confirmPassword: formData.confirmPassword
+            });
+            alert('Password reset successfully!');
+            router.push('/login');
+        } catch (error) {
+            console.error('Failed to reset password:', error);
+            alert(error.response?.data?.message || 'Failed to reset password');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleChange = (e) => {
@@ -46,6 +66,24 @@ export default function ResetPasswordPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* OTP */}
+                    <div>
+                        <label htmlFor="otp" className="block text-sm font-medium text-[#3A3A3A] mb-2">
+                            OTP Code
+                        </label>
+                        <input
+                            type="text"
+                            id="otp"
+                            name="otp"
+                            value={formData.otp}
+                            onChange={handleChange}
+                            required
+                            maxLength={6}
+                            className="w-full px-4 py-3 border border-[#9F9F9F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent tracking-widest text-center text-lg"
+                            placeholder="123456"
+                        />
+                    </div>
+
                     {/* New Password */}
                     <div>
                         <label htmlFor="password" className="block text-sm font-medium text-[#3A3A3A] mb-2">
@@ -88,9 +126,10 @@ export default function ResetPasswordPage() {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        className="w-full bg-[#B88E2F] text-white py-3 rounded-lg font-semibold hover:bg-[#9F7A28] transition-colors duration-300"
+                        disabled={loading}
+                        className="w-full bg-[#B88E2F] text-white py-3 rounded-lg font-semibold hover:bg-[#9F7A28] transition-colors duration-300 disabled:opacity-50"
                     >
-                        Reset Password
+                        {loading ? 'Resetting...' : 'Reset Password'}
                     </button>
 
                     {/* Back to Login */}
@@ -103,5 +142,13 @@ export default function ResetPasswordPage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+            <ResetPasswordForm />
+        </Suspense>
     );
 }

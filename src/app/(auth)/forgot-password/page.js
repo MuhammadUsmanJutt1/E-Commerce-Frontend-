@@ -2,43 +2,27 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import api from '@/lib/api';
 
 export default function ForgotPasswordPage() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
-    const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: Implement password reset email
-        console.log('Reset password for:', email);
-        setSubmitted(true);
+        setLoading(true);
+        try {
+            await api.post('/auth/forgot-password', { email });
+            router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+        } catch (error) {
+            console.error('Failed to send OTP:', error);
+            alert('Failed to send OTP. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
-
-    if (submitted) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12">
-                <div className="w-full max-w-md text-center">
-                    <div className="mb-6">
-                        <div className="w-16 h-16 bg-[#B88E2F]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-[#B88E2F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <h1 className="text-3xl font-bold text-[#3A3A3A] mb-2">Check Your Email</h1>
-                        <p className="text-[#898989] mb-6">
-                            We've sent a password reset link to <strong>{email}</strong>
-                        </p>
-                    </div>
-                    <Link
-                        href="/login"
-                        className="inline-block bg-[#B88E2F] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#9F7A28] transition-colors duration-300"
-                    >
-                        Back to Login
-                    </Link>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12">
@@ -68,9 +52,10 @@ export default function ForgotPasswordPage() {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        className="w-full bg-[#B88E2F] text-white py-3 rounded-lg font-semibold hover:bg-[#9F7A28] transition-colors duration-300"
+                        disabled={loading}
+                        className="w-full bg-[#B88E2F] text-white py-3 rounded-lg font-semibold hover:bg-[#9F7A28] transition-colors duration-300 disabled:opacity-50"
                     >
-                        Send Reset Link
+                        {loading ? 'Sending...' : 'Send OTP'}
                     </button>
 
                     {/* Back to Login */}
