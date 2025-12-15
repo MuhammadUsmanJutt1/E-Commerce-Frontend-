@@ -12,8 +12,10 @@ export default function EditProductPage() {
     const router = useRouter();
     const params = useParams();
     const { getProductById, updateProduct } = useProducts();
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
+    const [formData, setFormData] = useState(null);
+    const [currentImages, setCurrentImages] = useState([]);
+    const [newFiles, setNewFiles] = useState([]);
+    const [newPreviews, setNewPreviews] = useState([]);
 
     const categories = ['Chairs', 'Sofas', 'Tables', 'Beds', 'Storage'];
 
@@ -33,7 +35,12 @@ export default function EditProductPage() {
                 isFeatured: product.isFeatured,
                 image: product.image
             });
-            setPreviewUrl(product.image);
+            // Initialize current images
+            if (product.images && product.images.length > 0) {
+                setCurrentImages(product.images);
+            } else if (product.image) {
+                setCurrentImages([product.image]);
+            }
         }
     }, [params.id, getProductById]);
 
@@ -46,31 +53,51 @@ export default function EditProductPage() {
     };
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            setNewFiles(prev => [...prev, ...files]);
+            const newUrls = files.map(file => URL.createObjectURL(file));
+            setNewPreviews(prev => [...prev, ...newUrls]);
         }
+    };
+
+    const removeCurrentImage = (index) => {
+        setCurrentImages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const removeNewFile = (index) => {
+        setNewFiles(prev => prev.filter((_, i) => i !== index));
+        setNewPreviews(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            let imageUrl = formData.image;
+            let uploadedUrls = [];
 
-            if (selectedFile) {
-                const uploadFormData = new FormData();
-                uploadFormData.append('file', selectedFile);
-                const { data } = await api.post('/products/upload', uploadFormData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                imageUrl = data.url;
+            // Upload new files
+            if (newFiles.length > 0) {
+                for (const file of newFiles) {
+                    const uploadFormData = new FormData();
+                    uploadFormData.append('file', file);
+                    const { data } = await api.post('/products/upload', uploadFormData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    uploadedUrls.push(data.url);
+                }
             }
+
+            // Combine current images and new uploaded images
+            const finalImages = [...currentImages, ...uploadedUrls];
+
+            // Ensure there's at least one image if possible, or fallback to default
+            const mainImage = finalImages.length > 0 ? finalImages[0] : '/images/shelf.png';
 
             const productData = {
                 ...formData,
-                image: imageUrl,
+                image: mainImage,
+                images: finalImages,
                 price: parseInt(formData.price),
                 originalPrice: formData.originalPrice ? parseInt(formData.originalPrice) : undefined,
                 discount: formData.discount ? parseInt(formData.discount) : undefined,
@@ -239,39 +266,70 @@ export default function EditProductPage() {
                         {/* Image Upload */}
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Product Image
+                                Product Images
                             </label>
-                            <div className="flex items-start gap-6">
-                                <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden relative border border-gray-200">
-                                    {previewUrl ? (
-                                        <img
-                                            src={previewUrl}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="flex items-center justify-center h-full text-gray-400">
-                                            No Image
+                            <div className="space-y-4">
+                                <div className="flex flex-wrap gap-4">
+                                    {/* Existing Images */}
+                                    {currentImages.map((url, index) => (
+                                        <div key={`current-${index}`} className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden relative border border-gray-200 group">
+                                            <img
+                                                src={url}
+                                                alt={`Current ${index}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeCurrentImage(index)}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </button>
                                         </div>
-                                    )}
+                                    ))}
+
+                                    {/* New File Previews */}
+                                    {newPreviews.map((url, index) => (
+                                        <div key={`new-${index}`} className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden relative border border-gray-200 group">
+                                            <img
+                                                src={url}
+                                                alt={`New ${index}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeNewFile(index)}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    <label className="w-32 h-32 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#B88E2F] hover:bg-gray-50 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 mb-2">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        <span className="text-xs text-gray-500">Add Image</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                        />
+                                    </label>
                                 </div>
-                                <div className="flex-1">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        className="block w-full text-sm text-gray-500
-                                            file:mr-4 file:py-2 file:px-4
-                                            file:rounded-full file:border-0
-                                            file:text-sm file:font-semibold
-                                            file:bg-[#B88E2F] file:text-white
-                                            hover:file:bg-[#9F7A28]
-                                        "
-                                    />
-                                    <p className="mt-2 text-sm text-gray-500">
-                                        Upload a product image. Supported formats: JPG, PNG, WEBP.
-                                    </p>
-                                </div>
+                                <p className="text-sm text-gray-500">
+                                    Upload product images. Supported formats: JPG, PNG, WEBP. First image will be the main image.
+                                </p>
                             </div>
                         </div>
 

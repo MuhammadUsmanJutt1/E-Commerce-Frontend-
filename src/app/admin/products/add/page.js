@@ -27,8 +27,8 @@ export default function AddProductPage() {
 
     const categories = ['Chairs', 'Sofas', 'Tables', 'Beds', 'Storage'];
 
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(formData.image);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [previewUrls, setPreviewUrls] = useState([]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -39,31 +39,44 @@ export default function AddProductPage() {
     };
 
     const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setSelectedFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            setSelectedFiles(prev => [...prev, ...files]);
+            const newPreviews = files.map(file => URL.createObjectURL(file));
+            setPreviewUrls(prev => [...prev, ...newPreviews]);
         }
+    };
+
+    const removeImage = (index) => {
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+        setPreviewUrls(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            let imageUrl = formData.image;
+            let imageUrls = [];
 
-            if (selectedFile) {
-                const uploadFormData = new FormData();
-                uploadFormData.append('file', selectedFile);
-                const { data } = await api.post('/products/upload', uploadFormData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                imageUrl = data.url;
+            // Upload all selected files
+            if (selectedFiles.length > 0) {
+                for (const file of selectedFiles) {
+                    const uploadFormData = new FormData();
+                    uploadFormData.append('file', file);
+                    const { data } = await api.post('/products/upload', uploadFormData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    imageUrls.push(data.url);
+                }
+            } else {
+                // Keep default if no files selected
+                imageUrls.push(formData.image);
             }
 
             const productData = {
                 ...formData,
-                image: imageUrl,
+                image: imageUrls[0], // Main image is the first one
+                images: imageUrls,
                 price: parseInt(formData.price),
                 originalPrice: formData.originalPrice ? parseInt(formData.originalPrice) : undefined,
                 discount: formData.discount ? parseInt(formData.discount) : undefined,
@@ -222,39 +235,47 @@ export default function AddProductPage() {
                         {/* Image Upload */}
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Product Image
+                                Product Images
                             </label>
-                            <div className="flex items-start gap-6">
-                                <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden relative border border-gray-200">
-                                    {previewUrl ? (
-                                        <img
-                                            src={previewUrl}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="flex items-center justify-center h-full text-gray-400">
-                                            No Image
+                            <div className="space-y-4">
+                                <div className="flex flex-wrap gap-4">
+                                    {previewUrls.map((url, index) => (
+                                        <div key={index} className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden relative border border-gray-200 group">
+                                            <img
+                                                src={url}
+                                                alt={`Preview ${index}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeImage(index)}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </button>
                                         </div>
-                                    )}
+                                    ))}
+                                    <label className="w-32 h-32 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#B88E2F] hover:bg-gray-50 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 mb-2">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        <span className="text-xs text-gray-500">Add Image</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                        />
+                                    </label>
                                 </div>
-                                <div className="flex-1">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileChange}
-                                        className="block w-full text-sm text-gray-500
-                                            file:mr-4 file:py-2 file:px-4
-                                            file:rounded-full file:border-0
-                                            file:text-sm file:font-semibold
-                                            file:bg-[#B88E2F] file:text-white
-                                            hover:file:bg-[#9F7A28]
-                                        "
-                                    />
-                                    <p className="mt-2 text-sm text-gray-500">
-                                        Upload a product image. Supported formats: JPG, PNG, WEBP.
-                                    </p>
-                                </div>
+                                <p className="text-sm text-gray-500">
+                                    Upload product images. Supported formats: JPG, PNG, WEBP. First image will be the main image.
+                                </p>
                             </div>
                         </div>
 

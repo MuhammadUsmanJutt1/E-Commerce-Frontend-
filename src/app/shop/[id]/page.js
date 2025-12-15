@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,15 +8,20 @@ import Navbar from '@/components/nav-bar/nav-bar';
 import Footer from '@/components/footer/footer';
 import Breadcrumb from '@/components/pages/common/breadcrumb';
 import Card from '@/components/pages/common/card';
+import ReviewsSection from '@/components/pages/shop/reviews-section';
+import RecentlyViewed from '@/components/pages/shop/recently-viewed';
+import RecommendedProducts from '@/components/pages/shop/recommended-products';
 import { useProducts } from '@/context/ProductsContext';
 import { useCart } from '@/context/CartContext';
-import { Star, Facebook, Linkedin, Twitter, ChevronRight } from 'lucide-react';
+import { useWishlist } from '@/context/WishlistContext';
+import { Star, Facebook, Linkedin, Twitter, ChevronRight, Heart } from 'lucide-react';
 
 export default function SingleProductPage() {
     const params = useParams();
     const router = useRouter();
     const { getProductById, products, loading } = useProducts();
     const { addToCart } = useCart();
+    const { toggleWishlist, isInWishlist } = useWishlist();
 
     const product = getProductById(params.id);
     const [quantity, setQuantity] = useState(1);
@@ -24,6 +29,14 @@ export default function SingleProductPage() {
     const [selectedColor, setSelectedColor] = useState('Purple');
     const [activeTab, setActiveTab] = useState('description');
     const [selectedImage, setSelectedImage] = useState(0);
+
+    useEffect(() => {
+        if (product) {
+            const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+            const newViewed = [product._id, ...viewed.filter(id => id !== product._id)].slice(0, 10);
+            localStorage.setItem('recentlyViewed', JSON.stringify(newViewed));
+        }
+    }, [product]);
 
     if (loading) {
         return (
@@ -55,16 +68,15 @@ export default function SingleProductPage() {
         { name: 'Gold', class: 'bg-[#B88E2F]' }
     ];
 
-    const thumbnails = [product.image, product.image, product.image, product.image];
-
-    // Get related products (same category, excluding current product)
-    const relatedProducts = products
-        .filter(p => p.category === product.category && p.id !== product.id)
-        .slice(0, 4);
+    const thumbnails = product.images && product.images.length > 0
+        ? product.images
+        : [product.image, product.image, product.image, product.image];
 
     const handleAddToCart = () => {
         addToCart(product, quantity);
     };
+
+    const isWishlisted = isInWishlist(product.id);
 
     return (
         <div className="bg-white transition-colors duration-300">
@@ -199,8 +211,15 @@ export default function SingleProductPage() {
                                 Add To Cart
                             </button>
 
-                            <button className="px-8 py-3 border border-gray-900 rounded-lg text-gray-900 hover:bg-gray-900 hover:text-white transition-colors">
-                                + Compare
+                            <button
+                                onClick={() => toggleWishlist(product)}
+                                className={`px-8 py-3 border rounded-lg transition-colors flex items-center gap-2 ${isWishlisted
+                                    ? 'border-[#B88E2F] text-[#B88E2F] bg-[#B88E2F]/10'
+                                    : 'border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white'
+                                    }`}
+                            >
+                                <Heart size={20} className={isWishlisted ? 'fill-current' : ''} />
+                                {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
                             </button>
                         </div>
 
@@ -258,7 +277,7 @@ export default function SingleProductPage() {
                                 : 'text-gray-500'
                                 }`}
                         >
-                            Reviews [5]
+                            Reviews
                         </button>
                     </div>
 
@@ -300,36 +319,16 @@ export default function SingleProductPage() {
                         )}
 
                         {activeTab === 'reviews' && (
-                            <div className="text-gray-600">
-                                <p className="mb-4">Customer reviews coming soon...</p>
-                            </div>
+                            <ReviewsSection productId={product.id} />
                         )}
                     </div>
                 </div>
 
-                {/* Related Products */}
-                <div>
-                    <h2 className="text-3xl font-semibold text-gray-900 text-center mb-8">
-                        Related Products
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {relatedProducts.map((relatedProduct) => (
-                            <Link key={relatedProduct.id} href={`/shop/${relatedProduct.id}`}>
-                                <Card product={relatedProduct} />
-                            </Link>
-                        ))}
-                    </div>
-
-                    <div className="text-center mt-12">
-                        <Link
-                            href="/shop"
-                            className="inline-block px-12 py-3 border-2 border-[#B88E2F] text-[#B88E2F] font-semibold hover:bg-[#B88E2F] hover:text-white transition-colors"
-                        >
-                            Show More
-                        </Link>
-                    </div>
-                </div>
+                {/* Recommended Products (AI Powered) */}
+                <RecommendedProducts currentProductId={product.id} />
             </div>
+
+            <RecentlyViewed />
 
             <Footer />
         </div>

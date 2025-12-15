@@ -31,6 +31,39 @@ export default function CheckoutPage() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const [couponCode, setCouponCode] = useState('');
+    const [discount, setDiscount] = useState(0);
+    const [couponError, setCouponError] = useState('');
+    const [couponSuccess, setCouponSuccess] = useState('');
+    const [validatingCoupon, setValidatingCoupon] = useState(false);
+
+    const handleApplyCoupon = async () => {
+        setCouponError('');
+        setCouponSuccess('');
+        setValidatingCoupon(true);
+
+        try {
+            const { data } = await api.post('/coupons/validate', {
+                code: couponCode,
+                orderAmount: getCartTotal(),
+                cartItems: cartItems.map(item => ({
+                    productId: item.id,
+                    quantity: item.quantity,
+                    price: item.price
+                }))
+            });
+
+            setDiscount(data.discountAmount);
+            setCouponSuccess(`Coupon applied! You saved Rp ${data.discountAmount.toLocaleString()}`);
+        } catch (error) {
+            console.error('Coupon validation failed:', error);
+            setCouponError(error.response?.data?.message || 'Invalid coupon code');
+            setDiscount(0);
+        } finally {
+            setValidatingCoupon(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -48,7 +81,9 @@ export default function CheckoutPage() {
                     email: formData.email
                 },
                 additionalInfo: formData.additionalInfo,
-                paymentMethod: formData.paymentMethod
+                paymentMethod: formData.paymentMethod,
+                couponCode: discount > 0 ? couponCode : null,
+                discountAmount: discount
             });
             clearCart();
             router.push('/');
@@ -274,6 +309,29 @@ export default function CheckoutPage() {
                                 </div>
 
                                 <div className="space-y-3 pt-4 border-t border-gray-200">
+                                    {/* Coupon Section */}
+                                    <div className="mb-4">
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={couponCode}
+                                                onChange={(e) => setCouponCode(e.target.value)}
+                                                placeholder="Coupon Code"
+                                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-[#B88E2F] text-sm"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={handleApplyCoupon}
+                                                disabled={validatingCoupon || !couponCode}
+                                                className="px-4 py-2 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                                            >
+                                                {validatingCoupon ? '...' : 'Apply'}
+                                            </button>
+                                        </div>
+                                        {couponError && <p className="text-red-500 text-xs mt-1">{couponError}</p>}
+                                        {couponSuccess && <p className="text-green-600 text-xs mt-1">{couponSuccess}</p>}
+                                    </div>
+
                                     <div className="flex justify-between">
                                         <span className="text-base text-[#3A3A3A]">Subtotal</span>
                                         <span className="text-base text-[#3A3A3A]">Rp {getCartTotal().toLocaleString()}</span>
@@ -282,10 +340,16 @@ export default function CheckoutPage() {
                                         <span className="text-base text-[#3A3A3A]">Shipping</span>
                                         <span className="text-base text-[#3A3A3A]">Free</span>
                                     </div>
+                                    {discount > 0 && (
+                                        <div className="flex justify-between pb-4 border-b border-gray-200 text-green-600">
+                                            <span className="text-base">Discount</span>
+                                            <span className="text-base">- Rp {discount.toLocaleString()}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between">
                                         <span className="text-xl font-semibold text-[#3A3A3A]">Total</span>
                                         <span className="text-2xl font-bold text-[#B88E2F]">
-                                            Rp {total.toLocaleString()}
+                                            Rp {(total - discount).toLocaleString()}
                                         </span>
                                     </div>
                                 </div>

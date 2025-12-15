@@ -2,6 +2,8 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "lib": ["dom", "es5"],
+    "target": "es5"
   }
 }

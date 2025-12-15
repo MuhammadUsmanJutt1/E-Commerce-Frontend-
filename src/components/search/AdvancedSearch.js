@@ -36,6 +36,7 @@ const AdvancedSearch = ({ onResults, onFiltersChange }) => {
       if (
         suggestionsRef.current &&
         !suggestionsRef.current.contains(event.target) &&
+        searchRef.current &&
         !searchRef.current.contains(event.target)
       ) {
         setShowSuggestions(false);
@@ -62,7 +63,7 @@ const AdvancedSearch = ({ onResults, onFiltersChange }) => {
   const fetchSuggestions = async () => {
     try {
       const response = await api.get(`/products?search=${searchQuery}&limit=5`);
-      setSuggestions(response.data.products || []);
+      setSuggestions(response.data || []);
       setShowSuggestions(true);
     } catch (error) {
       console.error('Failed to fetch suggestions:', error);
@@ -75,7 +76,7 @@ const AdvancedSearch = ({ onResults, onFiltersChange }) => {
 
     try {
       const params = new URLSearchParams();
-      
+
       if (query) params.append('search', query);
       if (filters.category) params.append('category', filters.category);
       if (filters.minPrice) params.append('minPrice', filters.minPrice);
@@ -86,7 +87,7 @@ const AdvancedSearch = ({ onResults, onFiltersChange }) => {
       if (filters.inStock) params.append('inStock', 'true');
 
       const response = await api.get(`/products?${params.toString()}`);
-      onResults(response.data.products || []);
+      onResults(response.data || []);
       onFiltersChange && onFiltersChange({ query, filters });
     } catch (error) {
       console.error('Search failed:', error);
@@ -99,7 +100,7 @@ const AdvancedSearch = ({ onResults, onFiltersChange }) => {
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    
+
     // Auto-search when filters change
     if (searchQuery || Object.values(newFilters).some(v => v !== '' && v !== false && v !== 0)) {
       handleSearch(searchQuery);
@@ -139,9 +140,8 @@ const AdvancedSearch = ({ onResults, onFiltersChange }) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
         key={index}
-        className={`w-4 h-4 cursor-pointer ${
-          index < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-        }`}
+        className={`w-4 h-4 cursor-pointer ${index < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+          }`}
         onClick={() => handleFilterChange('minRating', index + 1)}
       />
     ));
@@ -155,38 +155,43 @@ const AdvancedSearch = ({ onResults, onFiltersChange }) => {
   ) || searchQuery;
 
   return (
-    <div className="bg-white border rounded-lg shadow-sm">
+    <div className="w-full relative">
       {/* Search Bar */}
-      <div className="relative">
-        <div className="flex items-center p-4 border-b">
-          <div className="relative flex-1" ref={searchRef}>
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Search for furniture..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent"
-            />
-          </div>
-          
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`ml-3 p-2 rounded-md transition-colors ${
-              showFilters ? 'bg-[#B88E2F] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <SlidersHorizontal className="w-5 h-5" />
-          </button>
+      <div className="relative" ref={searchRef}>
+        <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 transition-all duration-300 focus-within:ring-2 focus-within:ring-[#B88E2F]/20 focus-within:bg-white focus-within:shadow-md">
+          <Search className="text-gray-400 w-5 h-5 flex-shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            placeholder="Search for furniture..."
+            className="w-full bg-transparent border-none focus:ring-0 text-gray-800 placeholder-gray-400 px-3 py-1 text-sm"
+          />
 
-          <button
-            onClick={() => handleSearch()}
-            disabled={loading}
-            className="ml-2 px-6 py-2 bg-[#B88E2F] text-white rounded-md hover:bg-[#A07A28] transition-colors disabled:opacity-50"
-          >
-            {loading ? 'Searching...' : 'Search'}
-          </button>
+          <div className="flex items-center gap-2 border-l border-gray-300 pl-3 ml-1">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-1.5 rounded-full transition-colors ${showFilters ? 'bg-[#B88E2F] text-white' : 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
+                }`}
+              title="Filters"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => handleSearch()}
+              disabled={loading}
+              className="p-1.5 rounded-full bg-[#B88E2F] text-white hover:bg-[#A07A28] transition-colors disabled:opacity-50 shadow-sm"
+              title="Search"
+            >
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Search className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Search Suggestions */}
@@ -221,7 +226,7 @@ const AdvancedSearch = ({ onResults, onFiltersChange }) => {
 
       {/* Filters */}
       {showFilters && (
-        <div className="p-4 bg-gray-50 border-t">
+        <div className="absolute top-full left-0 right-0 mt-2 p-4 bg-white border rounded-xl shadow-xl z-40 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Category Filter */}
             <div>
@@ -252,11 +257,10 @@ const AdvancedSearch = ({ onResults, onFiltersChange }) => {
                   <button
                     key={index}
                     onClick={() => setPriceRange(range.min, range.max)}
-                    className={`block w-full text-left px-2 py-1 text-sm rounded hover:bg-gray-200 ${
-                      filters.minPrice == range.min && filters.maxPrice == range.max
-                        ? 'bg-[#B88E2F] text-white'
-                        : ''
-                    }`}
+                    className={`block w-full text-left px-2 py-1 text-sm rounded hover:bg-gray-200 ${filters.minPrice == range.min && filters.maxPrice == range.max
+                      ? 'bg-[#B88E2F] text-white'
+                      : ''
+                      }`}
                   >
                     {range.label}
                   </button>

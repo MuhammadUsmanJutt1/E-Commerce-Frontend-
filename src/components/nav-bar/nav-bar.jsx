@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { User, Search, Heart, ShoppingCart, Menu, X } from "lucide-react";
 import Image from "next/image";
+import AdvancedSearch from '@/components/search/AdvancedSearch';
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
@@ -19,6 +20,7 @@ const routes = [
 const Navbar = ({ ...props }) => {
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
     const router = useRouter();
     const { getCartCount, setIsCartOpen } = useCart();
     const { user, logout } = useAuth();
@@ -27,7 +29,7 @@ const Navbar = ({ ...props }) => {
     const isRouteActive = (link) => pathname === link;
 
     return (
-        <nav className={classNames(props.className, "w-full bg-white font-poppins")}>
+        <nav className={classNames(props.className, "w-full bg-white font-poppins sticky top-0 z-50 shadow-sm")}>
             <div className="w-full px-5 md:px-10">
                 <div className="flex items-center justify-between h-[70px]">
                     {/* Logo */}
@@ -59,6 +61,11 @@ const Navbar = ({ ...props }) => {
                                 </Link>
                             ))}
                         </div>
+                    </div>
+
+                    {/* Desktop Search */}
+                    <div className="hidden md:block flex-1 max-w-[520px] px-6">
+                        <AdvancedSearch onResults={() => { }} onFiltersChange={() => { }} />
                     </div>
 
                     {/* Icons */}
@@ -96,7 +103,10 @@ const Navbar = ({ ...props }) => {
                                 <User size={22} />
                             </Link>
                         )}
-                        <button className="p-2 rounded-full text-black hover:text-[#B88E2F] hover:bg-gray-100 transition-all duration-300">
+                        <button
+                            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+                            className="md:hidden p-2 rounded-full text-black hover:text-[#B88E2F] hover:bg-gray-100 transition-all duration-300"
+                        >
                             <Search size={22} />
                         </button>
                         <Link href="/wishlist" className="p-2 rounded-full text-black hover:text-[#B88E2F] hover:bg-gray-100 transition-all duration-300">
@@ -126,6 +136,17 @@ const Navbar = ({ ...props }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Search Bar */}
+            {mobileSearchOpen && (
+                <div className="md:hidden px-5 pb-4 animate-in slide-in-from-top duration-300">
+                    <AdvancedSearch
+                        onResults={() => { }}
+                        onFiltersChange={() => { }}
+                        mobile={true}
+                    />
+                </div>
+            )}
 
             {/* Mobile Menu (Side Drawer) */}
             {mobileMenuOpen && (
@@ -178,7 +199,13 @@ const Navbar = ({ ...props }) => {
                                         <User size={20} />
                                         <span className="text-[10px]">Profile</span>
                                     </Link>
-                                    <button className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#B88E2F]">
+                                    <button
+                                        onClick={() => {
+                                            setMobileSearchOpen(!mobileSearchOpen);
+                                            setMobileMenuOpen(false);
+                                        }}
+                                        className="flex flex-col items-center gap-1 text-gray-500 hover:text-[#B88E2F]"
+                                    >
                                         <Search size={20} />
                                         <span className="text-[10px]">Search</span>
                                     </button>

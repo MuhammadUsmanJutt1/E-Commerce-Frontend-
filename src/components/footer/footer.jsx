@@ -86,6 +86,7 @@ export default function Footer() {
                             <Link href="/payment-options" className="hover:underline">Payment Options</Link>
                             <Link href="/returns" className="hover:underline">Returns</Link>
                             <Link href="/privacy-policies" className="hover:underline">Privacy Policies</Link>
+                            <Link href="/track-order" className="hover:underline">Track Order</Link>
                         </nav>
                     </div>
 

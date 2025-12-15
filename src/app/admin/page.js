@@ -1,43 +1,66 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/admin-layout';
-import { useProducts } from '@/context/ProductsContext';
 import { Package, DollarSign, ShoppingCart, TrendingUp } from 'lucide-react';
-import Image from 'next/image';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import api from '@/lib/api';
 
 export default function AdminDashboard() {
-    const { products } = useProducts();
+    const [analytics, setAnalytics] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const totalProducts = products.length;
-    const totalValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
-    const lowStockProducts = products.filter(p => p.stock < 10).length;
-    const featuredProducts = products.filter(p => p.isFeatured).length;
+    useEffect(() => {
+        const fetchAnalytics = async () => {
+            try {
+                const { data } = await api.get('/orders/analytics');
+                setAnalytics(data);
+            } catch (error) {
+                console.error('Failed to fetch analytics:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAnalytics();
+    }, []);
+
+    if (loading) {
+        return (
+            <AdminLayout>
+                <div className="flex items-center justify-center h-full">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#B88E2F]"></div>
+                </div>
+            </AdminLayout>
+        );
+    }
+
+    if (!analytics) return null;
 
     const stats = [
         {
-            title: 'Total Products',
-            value: totalProducts,
-            icon: Package,
-            color: 'bg-blue-500'
-        },
-        {
-            title: 'Total Inventory Value',
-            value: `Rp ${(totalValue / 1000000).toFixed(1)}M`,
+            title: 'Total Revenue',
+            value: `Rp ${analytics.totalRevenue.toLocaleString()}`,
             icon: DollarSign,
             color: 'bg-green-500'
         },
         {
-            title: 'Low Stock Items',
-            value: lowStockProducts,
+            title: 'Total Orders',
+            value: analytics.totalOrders,
             icon: ShoppingCart,
-            color: 'bg-red-500'
+            color: 'bg-blue-500'
         },
         {
-            title: 'Featured Products',
-            value: featuredProducts,
+            title: 'Avg. Order Value',
+            value: `Rp ${Math.round(analytics.averageOrderValue).toLocaleString()}`,
             icon: TrendingUp,
             color: 'bg-purple-500'
+        },
+        {
+            title: 'Sales Growth',
+            value: '+12.5%', // Placeholder for now
+            icon: Package,
+            color: 'bg-orange-500'
         }
     ];
 
@@ -51,7 +74,7 @@ export default function AdminDashboard() {
                     {stats.map((stat, index) => {
                         const Icon = stat.icon;
                         return (
-                            <div key={index} className="bg-white p-6 rounded-lg border border-gray-200">
+                            <div key={index} className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
@@ -66,53 +89,43 @@ export default function AdminDashboard() {
                     })}
                 </div>
 
-                {/* Recent Products */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Products</h2>
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-gray-200">
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Product</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Category</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Price</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Stock</th>
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {products.slice(0, 5).map((product) => (
-                                    <tr key={product.id} className="border-b border-gray-100">
-                                        <td className="py-3 px-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gray-200 rounded overflow-hidden relative">
-                                                    {product.image && (
-                                                        <Image
-                                                            src={product.image}
-                                                            alt={product.title}
-                                                            fill
-                                                            className="object-cover"
-                                                        />
-                                                    )}
-                                                </div>
-                                                <span className="text-sm text-gray-900">{product.title}</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-3 px-4 text-sm text-gray-600">{product.category}</td>
-                                        <td className="py-3 px-4 text-sm text-gray-900">Rp {product.price.toLocaleString()}</td>
-                                        <td className="py-3 px-4 text-sm text-gray-600">{product.stock}</td>
-                                        <td className="py-3 px-4">
-                                            <span className={`px-2 py-1 text-xs rounded-full ${product.stock < 10
-                                                ? 'bg-red-100 text-red-600'
-                                                : 'bg-green-100 text-green-600'
-                                                }`}>
-                                                {product.stock < 10 ? 'Low Stock' : 'In Stock'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                {/* Charts Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    {/* Sales Chart */}
+                    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Monthly Sales</h2>
+                        <div className="h-[300px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={analytics.monthlySales}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                                    <YAxis axisLine={false} tickLine={false} tickFormatter={(value) => `Rp ${value / 1000}k`} />
+                                    <Tooltip
+                                        formatter={(value) => [`Rp ${value.toLocaleString()}`, 'Sales']}
+                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                    />
+                                    <Bar dataKey="sales" fill="#B88E2F" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* Orders Chart */}
+                    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-6">Monthly Orders</h2>
+                        <div className="h-[300px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={analytics.monthlySales}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                                    <YAxis axisLine={false} tickLine={false} />
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                    />
+                                    <Bar dataKey="orders" fill="#816DFA" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
                 </div>
             </div>

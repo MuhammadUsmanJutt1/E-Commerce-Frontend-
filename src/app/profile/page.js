@@ -6,14 +6,27 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import Navbar from '@/components/nav-bar/nav-bar';
 import Footer from '@/components/footer/footer';
-import { Package, User, MapPin, CreditCard, ChevronRight, Box } from 'lucide-react';
+import AddressCard from '@/components/pages/profile/address-card';
+import { Package, User, MapPin, CreditCard, ChevronRight, Box, Plus } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
-    const { user, logout, loading: authLoading } = useAuth();
+    const { user, logout, loading: authLoading, refreshUser } = useAuth();
     const router = useRouter();
     const [orders, setOrders] = useState([]);
     const [loadingOrders, setLoadingOrders] = useState(true);
     const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'profile', 'addresses'
+    const [showAddAddress, setShowAddAddress] = useState(false);
+    const [newAddress, setNewAddress] = useState({
+        firstName: '',
+        lastName: '',
+        phone: '',
+        streetAddress: '',
+        city: '',
+        province: '',
+        zipCode: '',
+        isDefault: false
+    });
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -35,6 +48,52 @@ export default function ProfilePage() {
             console.error('Failed to fetch orders:', error);
         } finally {
             setLoadingOrders(false);
+        }
+    };
+
+    const handleAddAddress = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post('/auth/address', newAddress);
+            await refreshUser();
+            setShowAddAddress(false);
+            setNewAddress({
+                firstName: '',
+                lastName: '',
+                phone: '',
+                streetAddress: '',
+                city: '',
+                province: '',
+                zipCode: '',
+                isDefault: false
+            });
+            toast.success('Address added successfully');
+        } catch (error) {
+            console.error('Failed to add address:', error);
+            toast.error('Failed to add address');
+        }
+    };
+
+    const handleRemoveAddress = async (addressId) => {
+        if (!confirm('Are you sure you want to remove this address?')) return;
+        try {
+            await api.delete(`/auth/address/${addressId}`);
+            await refreshUser();
+            toast.success('Address removed');
+        } catch (error) {
+            console.error('Failed to remove address:', error);
+            toast.error('Failed to remove address');
+        }
+    };
+
+    const handleSetDefault = async (addressId) => {
+        try {
+            await api.post(`/auth/address/${addressId}/default`);
+            await refreshUser();
+            toast.success('Default address updated');
+        } catch (error) {
+            console.error('Failed to set default address:', error);
+            toast.error('Failed to update default address');
         }
     };
 
@@ -216,26 +275,147 @@ export default function ProfilePage() {
                         )}
 
                         {activeTab === 'addresses' && (
-                            <div className="bg-white rounded-lg border border-gray-200 p-8">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Addresses</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-gray-500 hover:border-[#B88E2F] hover:text-[#B88E2F] cursor-pointer transition-colors h-48">
-                                        <Plus size={32} className="mb-2" />
-                                        <span className="font-medium">Add Address</span>
-                                    </div>
-                                    {/* Placeholder for existing addresses */}
-                                    <div className="border border-gray-200 rounded-lg p-6 relative hover:shadow-md transition-shadow">
-                                        <div className="absolute top-4 right-4 text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">Default</div>
-                                        <p className="font-bold text-gray-900 mb-2">{user.name}</p>
-                                        <p className="text-gray-600 text-sm mb-1">123 Main Street</p>
-                                        <p className="text-gray-600 text-sm mb-1">Apartment 4B</p>
-                                        <p className="text-gray-600 text-sm mb-4">New York, NY 10001</p>
-                                        <div className="flex gap-4 text-sm">
-                                            <button className="text-[#B88E2F] hover:underline">Edit</button>
-                                            <button className="text-[#B88E2F] hover:underline">Remove</button>
-                                        </div>
-                                    </div>
+                            <div className="space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-2xl font-bold text-gray-900">Your Addresses</h2>
+                                    {!showAddAddress && (
+                                        <button
+                                            onClick={() => setShowAddAddress(true)}
+                                            className="bg-[#B88E2F] text-white px-4 py-2 rounded-lg hover:bg-[#9F7A28] transition-colors flex items-center gap-2"
+                                        >
+                                            <Plus size={20} />
+                                            Add New
+                                        </button>
+                                    )}
                                 </div>
+
+                                {showAddAddress ? (
+                                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                                        <h3 className="text-lg font-bold text-gray-900 mb-4">Add New Address</h3>
+                                        <form onSubmit={handleAddAddress} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    value={newAddress.firstName}
+                                                    onChange={e => setNewAddress({ ...newAddress, firstName: e.target.value })}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#B88E2F] focus:border-[#B88E2F]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    value={newAddress.lastName}
+                                                    onChange={e => setNewAddress({ ...newAddress, lastName: e.target.value })}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#B88E2F] focus:border-[#B88E2F]"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    value={newAddress.streetAddress}
+                                                    onChange={e => setNewAddress({ ...newAddress, streetAddress: e.target.value })}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#B88E2F] focus:border-[#B88E2F]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    value={newAddress.city}
+                                                    onChange={e => setNewAddress({ ...newAddress, city: e.target.value })}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#B88E2F] focus:border-[#B88E2F]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    value={newAddress.province}
+                                                    onChange={e => setNewAddress({ ...newAddress, province: e.target.value })}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#B88E2F] focus:border-[#B88E2F]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    value={newAddress.zipCode}
+                                                    onChange={e => setNewAddress({ ...newAddress, zipCode: e.target.value })}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#B88E2F] focus:border-[#B88E2F]"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                                <input
+                                                    type="tel"
+                                                    required
+                                                    value={newAddress.phone}
+                                                    onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#B88E2F] focus:border-[#B88E2F]"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="flex items-center gap-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={newAddress.isDefault}
+                                                        onChange={e => setNewAddress({ ...newAddress, isDefault: e.target.checked })}
+                                                        className="rounded text-[#B88E2F] focus:ring-[#B88E2F]"
+                                                    />
+                                                    <span className="text-sm text-gray-700">Set as default address</span>
+                                                </label>
+                                            </div>
+                                            <div className="md:col-span-2 flex justify-end gap-4 mt-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowAddAddress(false)}
+                                                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    className="px-6 py-2 bg-[#B88E2F] text-white rounded-lg hover:bg-[#9F7A28] transition-colors"
+                                                >
+                                                    Save Address
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {user.addresses && user.addresses.length > 0 ? (
+                                            user.addresses.map((address) => (
+                                                <AddressCard
+                                                    key={address._id}
+                                                    address={address}
+                                                    onDelete={handleRemoveAddress}
+                                                    onSetDefault={handleSetDefault}
+                                                />
+                                            ))
+                                        ) : (
+                                            <div className="col-span-full text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
+                                                <MapPin size={48} className="mx-auto text-gray-300 mb-4" />
+                                                <p className="text-gray-500 mb-4">No addresses saved yet</p>
+                                                <button
+                                                    onClick={() => setShowAddAddress(true)}
+                                                    className="text-[#B88E2F] font-medium hover:underline"
+                                                >
+                                                    Add your first address
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -247,23 +427,4 @@ export default function ProfilePage() {
     );
 }
 
-// Helper component for Plus icon since it wasn't imported
-function Plus({ size, className }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={size}
-            height={size}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-        >
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-    );
-}
+
