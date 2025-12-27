@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useAlert } from '@/context/AlertContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import api from '@/lib/api';
+import api, { API_BASE_URL } from '@/lib/api';
 import { ArrowLeft, Save, Upload, X } from 'lucide-react';
 
 function EditProductContent() {
@@ -43,7 +43,7 @@ function EditProductContent() {
       setLoading(true);
       const response = await api.get(`/products/${params.productId}`);
       const productData = response.data;
-      
+
       setProduct(productData);
       setFormData({
         title: productData.title || '',
@@ -59,10 +59,10 @@ function EditProductContent() {
         isFeatured: productData.isFeatured || false,
         discount: productData.discount || ''
       });
-      
+
       // Set existing images as previews
       if (productData.images && productData.images.length > 0) {
-        setImagePreviews(productData.images.map(img => `http://localhost:3001${img}`));
+        setImagePreviews(productData.images.map(img => `${API_BASE_URL}${img}`));
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -83,7 +83,7 @@ function EditProductContent() {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    
+
     if (files.length > 5) {
       showError('Maximum 5 images allowed');
       return;
@@ -95,7 +95,7 @@ function EditProductContent() {
         showError('Each image must be less than 5MB');
         return;
       }
-      
+
       if (!file.type.startsWith('image/')) {
         showError('Only image files are allowed');
         return;
@@ -103,7 +103,7 @@ function EditProductContent() {
     }
 
     setImageFiles(files);
-    
+
     // Create previews
     const previews = files.map(file => URL.createObjectURL(file));
     setImagePreviews(previews);
@@ -112,7 +112,7 @@ function EditProductContent() {
   const removeImage = (index) => {
     const newFiles = imageFiles.filter((_, i) => i !== index);
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    
+
     setImageFiles(newFiles);
     setImagePreviews(newPreviews);
   };
@@ -123,7 +123,7 @@ function EditProductContent() {
 
     try {
       const submitData = new FormData();
-      
+
       // Add form fields
       Object.keys(formData).forEach(key => {
         if (key !== 'images') {
@@ -180,7 +180,7 @@ function EditProductContent() {
           {/* Basic Information */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Basic Information</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -324,7 +324,7 @@ function EditProductContent() {
           {/* Images */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Product Images</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

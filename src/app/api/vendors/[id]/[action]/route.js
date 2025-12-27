@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ecommerce-backend-production-a7ab.up.railway.app';
 
 export async function PUT(request, { params }) {
   try {
     const { id, action } = params;
     const authHeader = request.headers.get('authorization');
-    
+
     const response = await fetch(`${API_BASE_URL}/vendors/${id}/${action}`, {
       method: 'PUT',
       headers: {
@@ -38,7 +38,7 @@ export async function DELETE(request, { params }) {
   try {
     const { id } = params;
     const authHeader = request.headers.get('authorization');
-    
+
     const response = await fetch(`${API_BASE_URL}/vendors/${id}`, {
       method: 'DELETE',
       headers: {

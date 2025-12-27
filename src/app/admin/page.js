@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useAlert } from '@/context/AlertContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import api from '@/lib/api';
-import { 
-  Users, 
-  Store, 
-  ShoppingBag, 
-  AlertTriangle, 
-  Mail, 
+import api, { API_BASE_URL } from '@/lib/api';
+import {
+  Users,
+  Store,
+  ShoppingBag,
+  AlertTriangle,
+  Mail,
   TrendingUp,
   CheckCircle,
   XCircle,
@@ -38,7 +38,7 @@ function AdminDashboardContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [vendorProducts, setVendorProducts] = useState([]);
-  
+
   // Newsletter state
   const [newsletterData, setNewsletterData] = useState(null);
   const [selectedTargets, setSelectedTargets] = useState(['subscribers']);
@@ -56,7 +56,7 @@ function AdminDashboardContent() {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch vendors using the API client
       const vendorsRes = await api.get('/vendors/all');
       const vendorsData = vendorsRes.data.vendors || []; // Handle pagination structure
@@ -114,13 +114,13 @@ function AdminDashboardContent() {
 
       const response = await api.post('/newsletter/send-targeted', payload);
       showSuccess(`Newsletter sent successfully to ${response.data.successful} recipients!`);
-      
+
       // Reset form
       setNewsletterSubject('');
       setNewsletterContent('');
       setSelectedTargets(['subscribers']);
       setSelectedCategories([]);
-      
+
     } catch (error) {
       console.error('Error sending newsletter:', error);
       showError('Failed to send newsletter. Please try again.');
@@ -173,7 +173,7 @@ function AdminDashboardContent() {
         setVendorProducts([]);
         return;
       }
-      
+
       const productsRes = await api.get(`/products?vendor=${vendor.user._id}`);
       setVendorProducts(productsRes.data.products || []);
     } catch (error) {
@@ -268,11 +268,10 @@ function AdminDashboardContent() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-300 ${
-                      activeTab === tab.id
-                        ? 'bg-gradient-to-r from-[#B88E2F] to-[#d4a574] text-white shadow-md transform scale-105'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-[#B88E2F] hover:transform hover:scale-102'
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-300 ${activeTab === tab.id
+                      ? 'bg-gradient-to-r from-[#B88E2F] to-[#d4a574] text-white shadow-md transform scale-105'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-[#B88E2F] hover:transform hover:scale-102'
+                      }`}
                   >
                     <Icon size={20} />
                     <span className="font-medium">{tab.name}</span>
@@ -496,72 +495,71 @@ function AdminDashboardContent() {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {vendors
-                        .filter(vendor => 
+                        .filter(vendor =>
                           vendor.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           (vendor.contactPerson && vendor.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())) ||
                           (vendor.user?.name && vendor.user.name.toLowerCase().includes(searchTerm.toLowerCase()))
                         )
                         .map((vendor) => (
-                        <tr key={vendor._id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{vendor.businessName}</div>
-                              <div className="text-sm text-gray-500">{vendor.businessType}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="text-sm text-gray-900">{vendor.contactPerson || vendor.user?.name || 'No contact person'}</div>
-                              <div className="text-sm text-gray-500">{vendor.email}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              vendor.status === 'approved' ? 'bg-green-100 text-green-800' :
-                              vendor.status === 'pending' ? 'bg-orange-100 text-orange-800' :
-                              vendor.status === 'suspended' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {vendor.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex gap-2">
-                              <button 
-                                onClick={() => handleViewVendor(vendor)}
-                                className="text-[#B88E2F] hover:text-[#d4a574]"
-                              >
-                                <Eye size={16} />
-                              </button>
-                              {vendor.status === 'approved' && (
-                                <button 
-                                  onClick={() => handleVendorAction(vendor._id, 'suspend')}
-                                  className="text-orange-600 hover:text-orange-900"
-                                  title="Suspend Vendor"
+                          <tr key={vendor._id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{vendor.businessName}</div>
+                                <div className="text-sm text-gray-500">{vendor.businessType}</div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="text-sm text-gray-900">{vendor.contactPerson || vendor.user?.name || 'No contact person'}</div>
+                                <div className="text-sm text-gray-500">{vendor.email}</div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${vendor.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                vendor.status === 'pending' ? 'bg-orange-100 text-orange-800' :
+                                  vendor.status === 'suspended' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-red-100 text-red-800'
+                                }`}>
+                                {vendor.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleViewVendor(vendor)}
+                                  className="text-[#B88E2F] hover:text-[#d4a574]"
                                 >
-                                  <Ban size={16} />
+                                  <Eye size={16} />
                                 </button>
-                              )}
-                              {vendor.status === 'suspended' && (
-                                <button 
-                                  onClick={() => handleVendorAction(vendor._id, 'unsuspend')}
-                                  className="text-green-600 hover:text-green-900"
-                                  title="Unsuspend Vendor"
+                                {vendor.status === 'approved' && (
+                                  <button
+                                    onClick={() => handleVendorAction(vendor._id, 'suspend')}
+                                    className="text-orange-600 hover:text-orange-900"
+                                    title="Suspend Vendor"
+                                  >
+                                    <Ban size={16} />
+                                  </button>
+                                )}
+                                {vendor.status === 'suspended' && (
+                                  <button
+                                    onClick={() => handleVendorAction(vendor._id, 'unsuspend')}
+                                    className="text-green-600 hover:text-green-900"
+                                    title="Unsuspend Vendor"
+                                  >
+                                    <CheckCircle size={16} />
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => handleVendorAction(vendor._id, 'delete')}
+                                  className="text-red-600 hover:text-red-900"
+                                  title="Delete Vendor"
                                 >
-                                  <CheckCircle size={16} />
+                                  <Trash2 size={16} />
                                 </button>
-                              )}
-                              <button 
-                                onClick={() => handleVendorAction(vendor._id, 'delete')}
-                                className="text-red-600 hover:text-red-900"
-                                title="Delete Vendor"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -588,19 +586,18 @@ function AdminDashboardContent() {
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="p-6">
                     {/* Status and Actions */}
                     <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-4">
                           <span className="text-sm font-medium text-gray-600">Current Status:</span>
-                          <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                            selectedVendor.status === 'approved' ? 'bg-green-100 text-green-800' :
+                          <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${selectedVendor.status === 'approved' ? 'bg-green-100 text-green-800' :
                             selectedVendor.status === 'pending' ? 'bg-orange-100 text-orange-800' :
-                            selectedVendor.status === 'suspended' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
+                              selectedVendor.status === 'suspended' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                            }`}>
                             {selectedVendor.status?.toUpperCase()}
                           </span>
                           {selectedVendor.approvedAt && (
@@ -657,8 +654,8 @@ function AdminDashboardContent() {
                           {/* Personal Photo */}
                           {selectedVendor.documents?.personalPhoto && selectedVendor.documents.personalPhoto !== 'pending' && (
                             <div className="text-center mb-4">
-                              <img 
-                                src={`http://localhost:3001/uploads/vendor-documents/${selectedVendor.documents.personalPhoto}`}
+                              <img
+                                src={`${API_BASE_URL}/uploads/vendor-documents/${selectedVendor.documents.personalPhoto}`}
                                 alt="Personal Photo"
                                 className="w-24 h-24 rounded-full object-cover mx-auto border-4 border-gray-200"
                                 onError={(e) => { e.target.style.display = 'none'; }}
@@ -779,8 +776,8 @@ function AdminDashboardContent() {
                           {selectedVendor.documents?.cnicFrontPhoto && selectedVendor.documents.cnicFrontPhoto !== 'pending' && (
                             <div className="text-center">
                               <h4 className="text-sm font-medium text-gray-700 mb-2">CNIC Front Side</h4>
-                              <img 
-                                src={`http://localhost:3001/uploads/vendor-documents/${selectedVendor.documents.cnicFrontPhoto}`}
+                              <img
+                                src={`${API_BASE_URL}/uploads/vendor-documents/${selectedVendor.documents.cnicFrontPhoto}`}
                                 alt="CNIC Front"
                                 className="w-full max-w-sm mx-auto rounded-lg border border-gray-300 shadow-sm"
                                 onError={(e) => { e.target.style.display = 'none'; }}
@@ -790,8 +787,8 @@ function AdminDashboardContent() {
                           {selectedVendor.documents?.cnicBackPhoto && selectedVendor.documents.cnicBackPhoto !== 'pending' && (
                             <div className="text-center">
                               <h4 className="text-sm font-medium text-gray-700 mb-2">CNIC Back Side</h4>
-                              <img 
-                                src={`http://localhost:3001/uploads/vendor-documents/${selectedVendor.documents.cnicBackPhoto}`}
+                              <img
+                                src={`${API_BASE_URL}/uploads/vendor-documents/${selectedVendor.documents.cnicBackPhoto}`}
                                 alt="CNIC Back"
                                 className="w-full max-w-sm mx-auto rounded-lg border border-gray-300 shadow-sm"
                                 onError={(e) => { e.target.style.display = 'none'; }}
@@ -835,49 +832,43 @@ function AdminDashboardContent() {
                       <h3 className="text-lg font-semibold mb-4 text-gray-900">Document Status</h3>
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                         <div className="text-center">
-                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${
-                            selectedVendor.documents?.personalPhoto && selectedVendor.documents.personalPhoto !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
-                          }`}>
+                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${selectedVendor.documents?.personalPhoto && selectedVendor.documents.personalPhoto !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
+                            }`}>
                             {selectedVendor.documents?.personalPhoto && selectedVendor.documents.personalPhoto !== 'pending' ? <CheckCircle size={20} /> : <Clock size={20} />}
                           </div>
                           <p className="text-sm mt-2">Personal Photo</p>
                         </div>
                         <div className="text-center">
-                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${
-                            selectedVendor.documents?.cnicFrontPhoto && selectedVendor.documents.cnicFrontPhoto !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
-                          }`}>
+                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${selectedVendor.documents?.cnicFrontPhoto && selectedVendor.documents.cnicFrontPhoto !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
+                            }`}>
                             {selectedVendor.documents?.cnicFrontPhoto && selectedVendor.documents.cnicFrontPhoto !== 'pending' ? <CheckCircle size={20} /> : <Clock size={20} />}
                           </div>
                           <p className="text-sm mt-2">CNIC Front</p>
                         </div>
                         <div className="text-center">
-                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${
-                            selectedVendor.documents?.cnicBackPhoto && selectedVendor.documents.cnicBackPhoto !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
-                          }`}>
+                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${selectedVendor.documents?.cnicBackPhoto && selectedVendor.documents.cnicBackPhoto !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
+                            }`}>
                             {selectedVendor.documents?.cnicBackPhoto && selectedVendor.documents.cnicBackPhoto !== 'pending' ? <CheckCircle size={20} /> : <Clock size={20} />}
                           </div>
                           <p className="text-sm mt-2">CNIC Back</p>
                         </div>
                         <div className="text-center">
-                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${
-                            selectedVendor.documents?.businessLicense && selectedVendor.documents.businessLicense !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
-                          }`}>
+                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${selectedVendor.documents?.businessLicense && selectedVendor.documents.businessLicense !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
+                            }`}>
                             {selectedVendor.documents?.businessLicense && selectedVendor.documents.businessLicense !== 'pending' ? <CheckCircle size={20} /> : <Clock size={20} />}
                           </div>
                           <p className="text-sm mt-2">Business License</p>
                         </div>
                         <div className="text-center">
-                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${
-                            selectedVendor.documents?.taxCertificate && selectedVendor.documents.taxCertificate !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
-                          }`}>
+                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${selectedVendor.documents?.taxCertificate && selectedVendor.documents.taxCertificate !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
+                            }`}>
                             {selectedVendor.documents?.taxCertificate && selectedVendor.documents.taxCertificate !== 'pending' ? <CheckCircle size={20} /> : <Clock size={20} />}
                           </div>
                           <p className="text-sm mt-2">Tax Certificate</p>
                         </div>
                         <div className="text-center">
-                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${
-                            selectedVendor.documents?.identityProof && selectedVendor.documents.identityProof !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
-                          }`}>
+                          <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center ${selectedVendor.documents?.identityProof && selectedVendor.documents.identityProof !== 'pending' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
+                            }`}>
                             {selectedVendor.documents?.identityProof && selectedVendor.documents.identityProof !== 'pending' ? <CheckCircle size={20} /> : <Clock size={20} />}
                           </div>
                           <p className="text-sm mt-2">Identity Proof</p>
@@ -906,8 +897,8 @@ function AdminDashboardContent() {
                               <tr key={product._id}>
                                 <td className="px-4 py-4">
                                   <div className="flex items-center">
-                                    <img 
-                                      src={product.image || '/images/default-product.png'} 
+                                    <img
+                                      src={product.image || '/images/default-product.png'}
                                       alt={product.title}
                                       className="w-12 h-12 object-cover rounded-lg mr-3"
                                     />
@@ -925,9 +916,8 @@ function AdminDashboardContent() {
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-900">{product.stock}</td>
                                 <td className="px-4 py-4">
-                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                    product.isApproved ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
-                                  }`}>
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${product.isApproved ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                                    }`}>
                                     {product.isApproved ? 'Approved' : 'Pending'}
                                   </span>
                                 </td>
@@ -1012,42 +1002,40 @@ function AdminDashboardContent() {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {customers
-                        .filter(customer => 
+                        .filter(customer =>
                           customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           customer.email.toLowerCase().includes(searchTerm.toLowerCase())
                         )
                         .map((customer) => (
-                        <tr key={customer._id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{customer.name}</div>
-                              <div className="text-sm text-gray-500">{customer.email}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              customer.blocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                            }`}>
-                              {customer.blocked ? 'Blocked' : 'Active'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(customer.createdAt).toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button
-                              onClick={() => handleCustomerBlock(customer._id, !customer.blocked)}
-                              className={`${
-                                customer.blocked 
-                                  ? 'text-green-600 hover:text-green-900' 
+                          <tr key={customer._id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{customer.name}</div>
+                                <div className="text-sm text-gray-500">{customer.email}</div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${customer.blocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                                }`}>
+                                {customer.blocked ? 'Blocked' : 'Active'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {new Date(customer.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => handleCustomerBlock(customer._id, !customer.blocked)}
+                                className={`${customer.blocked
+                                  ? 'text-green-600 hover:text-green-900'
                                   : 'text-red-600 hover:text-red-900'
-                              }`}
-                            >
-                              {customer.blocked ? 'Unblock' : 'Block'}
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                                  }`}
+                              >
+                                {customer.blocked ? 'Unblock' : 'Block'}
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
@@ -1067,18 +1055,16 @@ function AdminDashboardContent() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <h3 className="text-lg font-semibold text-gray-900">{report.title}</h3>
-                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                report.status === 'open' ? 'bg-red-100 text-red-800' :
+                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${report.status === 'open' ? 'bg-red-100 text-red-800' :
                                 report.status === 'in-progress' ? 'bg-orange-100 text-orange-800' :
-                                'bg-green-100 text-green-800'
-                              }`}>
+                                  'bg-green-100 text-green-800'
+                                }`}>
                                 {report.status}
                               </span>
-                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                report.priority === 'high' ? 'bg-red-100 text-red-800' :
+                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${report.priority === 'high' ? 'bg-red-100 text-red-800' :
                                 report.priority === 'medium' ? 'bg-orange-100 text-orange-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
                                 {report.priority} priority
                               </span>
                             </div>
@@ -1120,7 +1106,7 @@ function AdminDashboardContent() {
                     </div>
                     <h2 className="text-xl font-semibold text-gray-900">Newsletter Management</h2>
                   </div>
-                  
+
                   {newsletterData && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                       <div className="bg-blue-50 p-4 rounded-lg">
@@ -1167,7 +1153,7 @@ function AdminDashboardContent() {
                     {/* Send Newsletter Form */}
                     <div className="space-y-6">
                       <h3 className="text-lg font-semibold text-gray-900">Send Newsletter</h3>
-                      
+
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Target Audience
@@ -1188,14 +1174,14 @@ function AdminDashboardContent() {
                                 className="rounded border-gray-300 text-[#B88E2F] focus:ring-[#B88E2F]"
                               />
                               <span className="ml-2 text-sm text-gray-700 capitalize">
-                                {target.replace('-', ' ')} 
+                                {target.replace('-', ' ')}
                                 {newsletterData && (
                                   <span className="text-gray-500">
                                     ({target === 'all-users' ? newsletterData.stats.totalUsers :
                                       target === 'customers' ? newsletterData.stats.totalCustomers :
-                                      target === 'vendors' ? newsletterData.stats.totalVendors :
-                                      target === 'subscribers' ? newsletterData.stats.totalSubscribers :
-                                      target === 'admins' ? newsletterData.stats.totalAdmins : 0})
+                                        target === 'vendors' ? newsletterData.stats.totalVendors :
+                                          target === 'subscribers' ? newsletterData.stats.totalSubscribers :
+                                            target === 'admins' ? newsletterData.stats.totalAdmins : 0})
                                   </span>
                                 )}
                               </span>
@@ -1259,7 +1245,7 @@ function AdminDashboardContent() {
                         />
                       </div>
 
-                      <button 
+                      <button
                         onClick={handleSendNewsletter}
                         disabled={!newsletterSubject || !newsletterContent || selectedTargets.length === 0}
                         className="w-full bg-[#B88E2F] text-white px-6 py-3 rounded-lg hover:bg-[#d4a574] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
@@ -1271,7 +1257,7 @@ function AdminDashboardContent() {
                     {/* Data Overview */}
                     <div className="space-y-6">
                       <h3 className="text-lg font-semibold text-gray-900">Data Overview</h3>
-                      
+
                       {newsletterData && (
                         <div className="space-y-4">
                           {/* Users Breakdown */}

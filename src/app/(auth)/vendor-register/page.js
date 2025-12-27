@@ -4,14 +4,15 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { API_BASE_URL } from '@/lib/api';
 import { useAlert } from '@/context/AlertContext';
-import { 
-  Upload, 
-  User, 
-  Building, 
-  MapPin, 
-  CreditCard, 
-  FileText, 
+import {
+  Upload,
+  User,
+  Building,
+  MapPin,
+  CreditCard,
+  FileText,
   Camera,
   CheckCircle,
   AlertCircle,
@@ -23,7 +24,7 @@ export default function VendorRegisterPage() {
   const router = useRouter();
   const { register } = useAuth();
   const { showError, showSuccess } = useAlert();
-  
+
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,7 +37,7 @@ export default function VendorRegisterPage() {
     alternatePhone: '',
     cnicNumber: '',
     dateOfBirth: '',
-    
+
     // Business Information
     shopName: '',
     businessName: '',
@@ -44,7 +45,7 @@ export default function VendorRegisterPage() {
     businessCategory: '',
     businessDescription: '',
     establishedYear: new Date().getFullYear(),
-    
+
     // Address Information
     businessAddress: {
       street: '',
@@ -61,7 +62,7 @@ export default function VendorRegisterPage() {
       country: 'Pakistan',
       sameAsBusiness: true
     },
-    
+
     // Financial Information
     bankDetails: {
       accountHolderName: '',
@@ -75,14 +76,14 @@ export default function VendorRegisterPage() {
       panNumber: '',
       ntnNumber: ''
     },
-    
+
     // Documents and Photos
     personalPhoto: null,
     cnicFrontPhoto: null,
     cnicBackPhoto: null,
     businessLicense: null,
     taxCertificate: null,
-    
+
     // Agreement
     agreeToTerms: false,
     agreeToPrivacy: false
@@ -120,7 +121,7 @@ export default function VendorRegisterPage() {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData(prev => ({
@@ -146,14 +147,14 @@ export default function VendorRegisterPage() {
         showError('File size must be less than 5MB');
         return;
       }
-      
+
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
       if (!allowedTypes.includes(file.type)) {
         showError('Only JPEG, PNG, and PDF files are allowed');
         return;
       }
-      
+
       setFormData(prev => ({
         ...prev,
         [fieldName]: file
@@ -241,22 +242,22 @@ export default function VendorRegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateStep(6)) return;
-    
+
     setLoading(true);
-    
+
     try {
       // Create FormData for file uploads
       const submitData = new FormData();
-      
+
       // Add all form fields
       submitData.append('name', formData.name);
       submitData.append('email', formData.email);
       submitData.append('password', formData.password);
       submitData.append('confirmPassword', formData.confirmPassword);
       submitData.append('role', 'vendor');
-      
+
       // Add vendor details as JSON
       const vendorDetails = {
         phoneNumber: formData.phoneNumber,
@@ -274,24 +275,24 @@ export default function VendorRegisterPage() {
         bankDetails: formData.bankDetails,
         taxDetails: formData.taxDetails
       };
-      
+
       submitData.append('vendorDetails', JSON.stringify(vendorDetails));
-      
+
       // Add files
       if (formData.personalPhoto) submitData.append('personalPhoto', formData.personalPhoto);
       if (formData.cnicFrontPhoto) submitData.append('cnicFrontPhoto', formData.cnicFrontPhoto);
       if (formData.cnicBackPhoto) submitData.append('cnicBackPhoto', formData.cnicBackPhoto);
       if (formData.businessLicense) submitData.append('businessLicense', formData.businessLicense);
       if (formData.taxCertificate) submitData.append('taxCertificate', formData.taxCertificate);
-      
+
       // Submit to backend
-      const response = await fetch('http://localhost:3001/auth/vendor-register', {
+      const response = await fetch(`${API_BASE_URL}/auth/vendor-register`, {
         method: 'POST',
         body: submitData
       });
-      
+
       const result = await response.json();
-      
+
       if (response.ok) {
         showSuccess('Vendor registration successful! Please verify your email.');
         router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
@@ -312,7 +313,7 @@ export default function VendorRegisterPage() {
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">Personal Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -328,7 +329,7 @@ export default function VendorRegisterPage() {
                   placeholder="Enter your full name"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email Address <span className="text-red-500">*</span>
@@ -343,7 +344,7 @@ export default function VendorRegisterPage() {
                   placeholder="Enter your email"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Primary Phone <span className="text-red-500">*</span>
@@ -358,7 +359,7 @@ export default function VendorRegisterPage() {
                   placeholder="+92 300 1234567"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Alternate Phone
@@ -372,7 +373,7 @@ export default function VendorRegisterPage() {
                   placeholder="+92 300 1234567"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   CNIC Number <span className="text-red-500">*</span>
@@ -388,7 +389,7 @@ export default function VendorRegisterPage() {
                   placeholder="1234567890123"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Date of Birth
@@ -401,7 +402,7 @@ export default function VendorRegisterPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Password <span className="text-red-500">*</span>
@@ -416,7 +417,7 @@ export default function VendorRegisterPage() {
                   placeholder="Create a strong password"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Confirm Password <span className="text-red-500">*</span>
@@ -434,12 +435,12 @@ export default function VendorRegisterPage() {
             </div>
           </div>
         );
-        
+
       case 2:
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">Business Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -455,7 +456,7 @@ export default function VendorRegisterPage() {
                   placeholder="Your shop display name"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Business Name <span className="text-red-500">*</span>
@@ -470,7 +471,7 @@ export default function VendorRegisterPage() {
                   placeholder="Legal business name"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Business Type <span className="text-red-500">*</span>
@@ -487,7 +488,7 @@ export default function VendorRegisterPage() {
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Business Category <span className="text-red-500">*</span>
@@ -505,7 +506,7 @@ export default function VendorRegisterPage() {
                   ))}
                 </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Established Year
@@ -521,7 +522,7 @@ export default function VendorRegisterPage() {
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Business Description <span className="text-red-500">*</span>
@@ -538,12 +539,12 @@ export default function VendorRegisterPage() {
             </div>
           </div>
         );
-        
+
       case 3:
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">Address Information</h3>
-            
+
             {/* Business Address */}
             <div className="bg-gray-50 p-6 rounded-lg">
               <h4 className="text-lg font-medium text-gray-900 mb-4">Business Address</h4>
@@ -562,7 +563,7 @@ export default function VendorRegisterPage() {
                     placeholder="Street address"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     City <span className="text-red-500">*</span>
@@ -577,7 +578,7 @@ export default function VendorRegisterPage() {
                     placeholder="City"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     State/Province <span className="text-red-500">*</span>
@@ -592,7 +593,7 @@ export default function VendorRegisterPage() {
                     placeholder="State/Province"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     ZIP Code <span className="text-red-500">*</span>
@@ -607,7 +608,7 @@ export default function VendorRegisterPage() {
                     placeholder="ZIP Code"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Country <span className="text-red-500">*</span>
@@ -623,7 +624,7 @@ export default function VendorRegisterPage() {
                 </div>
               </div>
             </div>
-            
+
             {/* Pickup Address */}
             <div className="bg-gray-50 p-6 rounded-lg">
               <div className="flex items-center justify-between mb-4">
@@ -638,7 +639,7 @@ export default function VendorRegisterPage() {
                   <span className="ml-2 text-sm text-gray-700">Same as business address</span>
                 </label>
               </div>
-              
+
               {!formData.pickupAddress.sameAsBusiness && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
@@ -655,7 +656,7 @@ export default function VendorRegisterPage() {
                       placeholder="Street address"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       City <span className="text-red-500">*</span>
@@ -670,7 +671,7 @@ export default function VendorRegisterPage() {
                       placeholder="City"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       State/Province <span className="text-red-500">*</span>
@@ -685,7 +686,7 @@ export default function VendorRegisterPage() {
                       placeholder="State/Province"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       ZIP Code <span className="text-red-500">*</span>
@@ -700,7 +701,7 @@ export default function VendorRegisterPage() {
                       placeholder="ZIP Code"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Country <span className="text-red-500">*</span>
@@ -719,12 +720,12 @@ export default function VendorRegisterPage() {
             </div>
           </div>
         );
-        
+
       case 4:
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">Financial Information</h3>
-            
+
             {/* Bank Details */}
             <div className="bg-gray-50 p-6 rounded-lg">
               <h4 className="text-lg font-medium text-gray-900 mb-4">Bank Details</h4>
@@ -743,7 +744,7 @@ export default function VendorRegisterPage() {
                     placeholder="Account holder name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Account Number <span className="text-red-500">*</span>
@@ -758,7 +759,7 @@ export default function VendorRegisterPage() {
                     placeholder="Account number"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Bank Name <span className="text-red-500">*</span>
@@ -773,7 +774,7 @@ export default function VendorRegisterPage() {
                     placeholder="Bank name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     IFSC/Routing Code
@@ -787,7 +788,7 @@ export default function VendorRegisterPage() {
                     placeholder="IFSC/Routing code"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Branch Name
@@ -803,7 +804,7 @@ export default function VendorRegisterPage() {
                 </div>
               </div>
             </div>
-            
+
             {/* Tax Details */}
             <div className="bg-gray-50 p-6 rounded-lg">
               <h4 className="text-lg font-medium text-gray-900 mb-4">Tax Details</h4>
@@ -821,7 +822,7 @@ export default function VendorRegisterPage() {
                     placeholder="GST registration number"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     PAN Number
@@ -835,7 +836,7 @@ export default function VendorRegisterPage() {
                     placeholder="PAN number"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     NTN Number
@@ -853,12 +854,12 @@ export default function VendorRegisterPage() {
             </div>
           </div>
         );
-        
+
       case 5:
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">Documents & Photos</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Personal Photo */}
               <div className="bg-gray-50 p-6 rounded-lg">
@@ -869,9 +870,9 @@ export default function VendorRegisterPage() {
                   <div className="space-y-1 text-center">
                     {formData.personalPhoto ? (
                       <div>
-                        <img 
-                          src={URL.createObjectURL(formData.personalPhoto)} 
-                          alt="Personal" 
+                        <img
+                          src={URL.createObjectURL(formData.personalPhoto)}
+                          alt="Personal"
                           className="mx-auto h-32 w-32 object-cover rounded-lg"
                         />
                         <p className="text-sm text-gray-600 mt-2">{formData.personalPhoto.name}</p>
@@ -896,7 +897,7 @@ export default function VendorRegisterPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* CNIC Front */}
               <div className="bg-gray-50 p-6 rounded-lg">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -906,9 +907,9 @@ export default function VendorRegisterPage() {
                   <div className="space-y-1 text-center">
                     {formData.cnicFrontPhoto ? (
                       <div>
-                        <img 
-                          src={URL.createObjectURL(formData.cnicFrontPhoto)} 
-                          alt="CNIC Front" 
+                        <img
+                          src={URL.createObjectURL(formData.cnicFrontPhoto)}
+                          alt="CNIC Front"
                           className="mx-auto h-32 w-48 object-cover rounded-lg"
                         />
                         <p className="text-sm text-gray-600 mt-2">{formData.cnicFrontPhoto.name}</p>
@@ -933,7 +934,7 @@ export default function VendorRegisterPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* CNIC Back */}
               <div className="bg-gray-50 p-6 rounded-lg">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -943,9 +944,9 @@ export default function VendorRegisterPage() {
                   <div className="space-y-1 text-center">
                     {formData.cnicBackPhoto ? (
                       <div>
-                        <img 
-                          src={URL.createObjectURL(formData.cnicBackPhoto)} 
-                          alt="CNIC Back" 
+                        <img
+                          src={URL.createObjectURL(formData.cnicBackPhoto)}
+                          alt="CNIC Back"
                           className="mx-auto h-32 w-48 object-cover rounded-lg"
                         />
                         <p className="text-sm text-gray-600 mt-2">{formData.cnicBackPhoto.name}</p>
@@ -970,7 +971,7 @@ export default function VendorRegisterPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Business License */}
               <div className="bg-gray-50 p-6 rounded-lg">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1003,7 +1004,7 @@ export default function VendorRegisterPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Tax Certificate */}
               <div className="bg-gray-50 p-6 rounded-lg">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1039,15 +1040,15 @@ export default function VendorRegisterPage() {
             </div>
           </div>
         );
-        
+
       case 6:
         return (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-6">Review & Submit</h3>
-            
+
             <div className="bg-gray-50 p-6 rounded-lg">
               <h4 className="text-lg font-medium text-gray-900 mb-4">Application Summary</h4>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h5 className="font-medium text-gray-900 mb-2">Personal Information</h5>
@@ -1058,7 +1059,7 @@ export default function VendorRegisterPage() {
                     <p><strong>CNIC:</strong> {formData.cnicNumber}</p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h5 className="font-medium text-gray-900 mb-2">Business Information</h5>
                   <div className="text-sm text-gray-600 space-y-1">
@@ -1068,7 +1069,7 @@ export default function VendorRegisterPage() {
                     <p><strong>Type:</strong> {formData.businessType}</p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h5 className="font-medium text-gray-900 mb-2">Documents Uploaded</h5>
                   <div className="text-sm text-gray-600 space-y-1">
@@ -1089,7 +1090,7 @@ export default function VendorRegisterPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h5 className="font-medium text-gray-900 mb-2">Bank Details</h5>
                   <div className="text-sm text-gray-600 space-y-1">
@@ -1100,7 +1101,7 @@ export default function VendorRegisterPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <label className="flex items-start">
                 <input
@@ -1119,7 +1120,7 @@ export default function VendorRegisterPage() {
                   and confirm that all information provided is accurate.
                 </span>
               </label>
-              
+
               <label className="flex items-start">
                 <input
                   type="checkbox"
@@ -1138,7 +1139,7 @@ export default function VendorRegisterPage() {
                 </span>
               </label>
             </div>
-            
+
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start">
                 <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 mr-3" />
@@ -1155,7 +1156,7 @@ export default function VendorRegisterPage() {
             </div>
           </div>
         );
-        
+
       default:
         return null;
     }
@@ -1177,31 +1178,28 @@ export default function VendorRegisterPage() {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
               const isCompleted = currentStep > step.id;
-              
+
               return (
                 <div key={step.id} className="flex items-center">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                    isCompleted 
-                      ? 'bg-[#B88E2F] border-[#B88E2F] text-white' 
-                      : isActive 
-                        ? 'border-[#B88E2F] text-[#B88E2F] bg-white' 
-                        : 'border-gray-300 text-gray-400 bg-white'
-                  }`}>
+                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${isCompleted
+                    ? 'bg-[#B88E2F] border-[#B88E2F] text-white'
+                    : isActive
+                      ? 'border-[#B88E2F] text-[#B88E2F] bg-white'
+                      : 'border-gray-300 text-gray-400 bg-white'
+                    }`}>
                     {isCompleted ? (
                       <CheckCircle size={20} />
                     ) : (
                       <Icon size={20} />
                     )}
                   </div>
-                  <span className={`ml-2 text-sm font-medium ${
-                    isActive ? 'text-[#B88E2F]' : isCompleted ? 'text-gray-900' : 'text-gray-400'
-                  }`}>
+                  <span className={`ml-2 text-sm font-medium ${isActive ? 'text-[#B88E2F]' : isCompleted ? 'text-gray-900' : 'text-gray-400'
+                    }`}>
                     {step.title}
                   </span>
                   {index < steps.length - 1 && (
-                    <div className={`w-12 h-0.5 mx-4 ${
-                      isCompleted ? 'bg-[#B88E2F]' : 'bg-gray-300'
-                    }`} />
+                    <div className={`w-12 h-0.5 mx-4 ${isCompleted ? 'bg-[#B88E2F]' : 'bg-gray-300'
+                      }`} />
                   )}
                 </div>
               );
@@ -1213,7 +1211,7 @@ export default function VendorRegisterPage() {
         <div className="bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit}>
             {renderStep()}
-            
+
             {/* Navigation Buttons */}
             <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
               <div>
@@ -1228,7 +1226,7 @@ export default function VendorRegisterPage() {
                   </button>
                 )}
               </div>
-              
+
               <div>
                 {currentStep < 6 ? (
                   <button

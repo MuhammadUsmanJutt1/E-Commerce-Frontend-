@@ -4,11 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useAlert } from '@/context/AlertContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import api from '@/lib/api';
-import { 
-  Package, 
-  ShoppingBag, 
-  TrendingUp, 
+import api, { API_BASE_URL } from '@/lib/api';
+import {
+  Package,
+  ShoppingBag,
+  TrendingUp,
   DollarSign,
   Plus,
   Edit,
@@ -108,7 +108,7 @@ function VendorProfileForm({ vendorProfile, onUpdate }) {
 
       // Set background image preview if exists
       if (vendorProfile.shopBackgroundImage) {
-        setBackgroundImagePreview(`http://localhost:3001${vendorProfile.shopBackgroundImage}`);
+        setBackgroundImagePreview(`${API_BASE_URL}${vendorProfile.shopBackgroundImage}`);
       }
     }
   }, [vendorProfile]);
@@ -135,7 +135,7 @@ function VendorProfileForm({ vendorProfile, onUpdate }) {
   const handleSave = async () => {
     try {
       const submitData = new FormData();
-      
+
       // Add all form fields
       Object.keys(formData).forEach(key => {
         if (typeof formData[key] === 'object' && formData[key] !== null) {
@@ -184,10 +184,10 @@ function VendorProfileForm({ vendorProfile, onUpdate }) {
         taxDetails: vendorProfile.taxDetails || {},
         socialLinks: vendorProfile.socialLinks || []
       });
-      
+
       // Reset background image preview
       if (vendorProfile.shopBackgroundImage) {
-        setBackgroundImagePreview(`http://localhost:3001${vendorProfile.shopBackgroundImage}`);
+        setBackgroundImagePreview(`${API_BASE_URL}${vendorProfile.shopBackgroundImage}`);
       } else {
         setBackgroundImagePreview(null);
       }
@@ -202,16 +202,16 @@ function VendorProfileForm({ vendorProfile, onUpdate }) {
         showError('File size must be less than 5MB');
         return;
       }
-      
+
       // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
         showError('Please select a valid image file (JPEG, PNG, GIF, WebP)');
         return;
       }
-      
+
       setBackgroundImageFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -228,8 +228,8 @@ function VendorProfileForm({ vendorProfile, onUpdate }) {
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Shop Information</h3>
           <p className="text-sm text-gray-600">
-            {vendorProfile?.status === 'pending' ? 
-              'Complete your profile to get approved faster' : 
+            {vendorProfile?.status === 'pending' ?
+              'Complete your profile to get approved faster' :
               'Manage your shop details and information'
             }
           </p>
@@ -354,9 +354,9 @@ function VendorProfileForm({ vendorProfile, onUpdate }) {
           <div className="mt-2">
             {backgroundImagePreview ? (
               <div className="relative">
-                <img 
-                  src={backgroundImagePreview} 
-                  alt="Shop Background" 
+                <img
+                  src={backgroundImagePreview}
+                  alt="Shop Background"
                   className="w-full h-48 object-cover rounded-lg border border-gray-300"
                 />
                 {isEditing && (
@@ -545,12 +545,11 @@ function VendorProfileForm({ vendorProfile, onUpdate }) {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600">Current Status:</p>
-            <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-              vendorProfile?.status === 'approved' ? 'bg-green-100 text-green-800' :
+            <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${vendorProfile?.status === 'approved' ? 'bg-green-100 text-green-800' :
               vendorProfile?.status === 'pending' ? 'bg-orange-100 text-orange-800' :
-              vendorProfile?.status === 'rejected' ? 'bg-red-100 text-red-800' :
-              'bg-gray-100 text-gray-800'
-            }`}>
+                vendorProfile?.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                  'bg-gray-100 text-gray-800'
+              }`}>
               {vendorProfile?.status?.toUpperCase() || 'UNKNOWN'}
             </span>
           </div>
@@ -592,7 +591,7 @@ function VendorDashboardContent() {
   const fetchVendorData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch vendor profile using API client
       try {
         const profileRes = await api.get('/vendors/my-profile');
@@ -717,11 +716,10 @@ function VendorDashboardContent() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
-                      activeTab === tab.id
-                        ? 'bg-[#B88E2F] text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === tab.id
+                      ? 'bg-[#B88E2F] text-white'
+                      : 'text-gray-700 hover:bg-gray-100'
+                      }`}
                   >
                     <Icon size={20} />
                     {tab.name}
@@ -802,11 +800,10 @@ function VendorDashboardContent() {
                               ${order.total?.toFixed(2) || '0.00'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
                                 order.status === 'pending' ? 'bg-orange-100 text-orange-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
                                 {order.status}
                               </span>
                             </td>
@@ -851,30 +848,29 @@ function VendorDashboardContent() {
                         <p className="text-gray-600 text-sm mb-2">{product.description?.slice(0, 100)}...</p>
                         <div className="flex justify-between items-center mb-4">
                           <span className="text-xl font-bold text-[#B88E2F]">${product.price}</span>
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            product.status === 'active' ? 'bg-green-100 text-green-800' :
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${product.status === 'active' ? 'bg-green-100 text-green-800' :
                             product.status === 'pending' ? 'bg-orange-100 text-orange-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
+                              'bg-red-100 text-red-800'
+                            }`}>
                             {product.status}
                           </span>
                         </div>
                         <div className="flex gap-2">
-                          <button 
+                          <button
                             onClick={() => window.open(`/shop/vendor/${vendorProfile._id}`, '_blank')}
                             className="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm hover:bg-gray-200 flex items-center justify-center gap-1"
                           >
                             <Eye size={16} />
                             View
                           </button>
-                          <button 
+                          <button
                             onClick={() => window.location.href = `/vendor/products/edit/${product._id}`}
                             className="flex-1 bg-blue-100 text-blue-700 px-3 py-2 rounded text-sm hover:bg-blue-200 flex items-center justify-center gap-1"
                           >
                             <Edit size={16} />
                             Edit
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleProductDelete(product._id)}
                             className="flex-1 bg-red-100 text-red-700 px-3 py-2 rounded text-sm hover:bg-red-200 flex items-center justify-center gap-1"
                           >
@@ -923,12 +919,11 @@ function VendorDashboardContent() {
                             ${order.total?.toFixed(2) || '0.00'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
                               order.status === 'pending' ? 'bg-orange-100 text-orange-800' :
-                              order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
+                                order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                                  'bg-gray-100 text-gray-800'
+                              }`}>
                               {order.status}
                             </span>
                           </td>

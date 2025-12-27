@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import api from '@/lib/api';
+import api, { API_BASE_URL } from '@/lib/api';
 import { useAlert } from '@/context/AlertContext';
-import { 
-  MapPin, 
-  Star, 
-  Package, 
-  Clock, 
-  Phone, 
+import {
+  MapPin,
+  Star,
+  Package,
+  Clock,
+  Phone,
   Mail,
   ExternalLink,
   Heart,
@@ -39,7 +39,7 @@ export default function ShopProfile() {
   const fetchShopData = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch vendor details
       const vendorRes = await api.get(`/vendors/${params.vendorId}`);
       setVendor(vendorRes.data);
@@ -117,11 +117,11 @@ export default function ShopProfile() {
       {/* Shop Header */}
       <div className="relative">
         {/* Background Image */}
-        <div 
+        <div
           className="h-64 bg-cover bg-center bg-gray-300"
           style={{
-            backgroundImage: vendor.shopBackgroundImage 
-              ? `url(http://localhost:3001${vendor.shopBackgroundImage})`
+            backgroundImage: vendor.shopBackgroundImage
+              ? `url(${API_BASE_URL}${vendor.shopBackgroundImage})`
               : 'linear-gradient(135deg, #B88E2F 0%, #d4a574 100%)'
           }}
         >
@@ -140,7 +140,7 @@ export default function ShopProfile() {
                   className="w-full h-full object-cover rounded"
                 />
               </div>
-              
+
               {/* Shop Details */}
               <div className="text-white">
                 <h1 className="text-3xl font-bold mb-2">{vendor.shopName}</h1>
@@ -234,21 +234,19 @@ export default function ShopProfile() {
                 <nav className="flex">
                   <button
                     onClick={() => setActiveTab('products')}
-                    className={`px-6 py-4 text-sm font-medium border-b-2 ${
-                      activeTab === 'products'
-                        ? 'border-[#B88E2F] text-[#B88E2F]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
+                    className={`px-6 py-4 text-sm font-medium border-b-2 ${activeTab === 'products'
+                      ? 'border-[#B88E2F] text-[#B88E2F]'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
                   >
                     Products ({products.length})
                   </button>
                   <button
                     onClick={() => setActiveTab('reviews')}
-                    className={`px-6 py-4 text-sm font-medium border-b-2 ${
-                      activeTab === 'reviews'
-                        ? 'border-[#B88E2F] text-[#B88E2F]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                    }`}
+                    className={`px-6 py-4 text-sm font-medium border-b-2 ${activeTab === 'reviews'
+                      ? 'border-[#B88E2F] text-[#B88E2F]'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
                   >
                     Reviews ({reviews.length})
                   </button>
@@ -272,7 +270,7 @@ export default function ShopProfile() {
                         <option value="rating">Highest Rated</option>
                       </select>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setViewMode('grid')}
@@ -291,14 +289,13 @@ export default function ShopProfile() {
 
                   {/* Products Grid */}
                   {sortedProducts.length > 0 ? (
-                    <div className={viewMode === 'grid' 
+                    <div className={viewMode === 'grid'
                       ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
                       : 'space-y-4'
                     }>
                       {sortedProducts.map((product) => (
-                        <div key={product._id} className={`bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow ${
-                          viewMode === 'list' ? 'flex' : ''
-                        }`}>
+                        <div key={product._id} className={`bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow ${viewMode === 'list' ? 'flex' : ''
+                          }`}>
                           <div className={viewMode === 'list' ? 'w-48 h-32' : 'aspect-w-1 aspect-h-1'}>
                             <img
                               src={product.images?.[0] || '/images/placeholder.svg'}

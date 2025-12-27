@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3001';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ecommerce-backend-production-a7ab.up.railway.app';
+
+const API_URL = API_BASE_URL;
 
 const api = axios.create({
     baseURL: API_URL,

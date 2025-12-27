@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ecommerce-backend-production-a7ab.up.railway.app';
 
 export async function GET(request) {
   try {
     const authHeader = request.headers.get('authorization');
-    
+
     const response = await fetch(`${API_BASE_URL}/vendors/all`, {
       method: 'GET',
       headers: {

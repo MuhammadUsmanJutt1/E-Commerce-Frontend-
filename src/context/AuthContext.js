@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '@/lib/api';
+import api, { API_BASE_URL } from '@/lib/api';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
@@ -50,19 +50,19 @@ export const AuthProvider = ({ children }) => {
             // Clear any existing tokens before login attempt
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
-            
+
             // Make the login request using axios directly to avoid interceptor issues
-            const { data } = await axios.post('http://localhost:3001/auth/login', { email, password }, {
+            const { data } = await axios.post(`${API_BASE_URL}/auth/login`, { email, password }, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('refreshToken', data.refreshToken);
             setUser(data.user);
             console.log('🔍 AuthContext - User data from login:', data.user);
-            
+
             // Redirect based on user role and approval status
             if (data.user.role === 'admin') {
                 router.push('/admin');
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }) => {
             } else {
                 router.push('/');
             }
-            
+
             return { success: true };
         } catch (error) {
             console.error('Login failed:', error);

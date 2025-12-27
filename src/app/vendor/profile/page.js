@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useAlert } from '@/context/AlertContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import api from '@/lib/api';
-import { 
-  User, 
-  Building, 
-  MapPin, 
-  CreditCard, 
-  FileText, 
+import api, { API_BASE_URL } from '@/lib/api';
+import {
+  User,
+  Building,
+  MapPin,
+  CreditCard,
+  FileText,
   Camera,
   Save,
   Upload,
@@ -123,16 +123,16 @@ function VendorProfileContent() {
 
       // Set existing document previews
       if (vendor.documents) {
-        const baseUrl = 'http://localhost:3001';
+        const baseUrl = API_BASE_URL;
         setPreviews({
-          personalPhoto: vendor.documents.personalPhoto !== 'pending' 
-            ? `${baseUrl}/uploads/vendor-documents/${vendor.documents.personalPhoto}` 
+          personalPhoto: vendor.documents.personalPhoto !== 'pending'
+            ? `${baseUrl}/uploads/vendor-documents/${vendor.documents.personalPhoto}`
             : null,
-          cnicFrontPhoto: vendor.documents.cnicFrontPhoto !== 'pending' 
-            ? `${baseUrl}/uploads/vendor-documents/${vendor.documents.cnicFrontPhoto}` 
+          cnicFrontPhoto: vendor.documents.cnicFrontPhoto !== 'pending'
+            ? `${baseUrl}/uploads/vendor-documents/${vendor.documents.cnicFrontPhoto}`
             : null,
-          cnicBackPhoto: vendor.documents.cnicBackPhoto !== 'pending' 
-            ? `${baseUrl}/uploads/vendor-documents/${vendor.documents.cnicBackPhoto}` 
+          cnicBackPhoto: vendor.documents.cnicBackPhoto !== 'pending'
+            ? `${baseUrl}/uploads/vendor-documents/${vendor.documents.cnicBackPhoto}`
             : null
         });
       }
@@ -144,7 +144,7 @@ function VendorProfileContent() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData(prev => ({
@@ -170,33 +170,33 @@ function VendorProfileContent() {
         showError('File size must be less than 5MB');
         return;
       }
-      
+
       // Enhanced file type validation with more image formats
       const allowedImageTypes = [
-        'image/jpeg', 
-        'image/jpg', 
-        'image/png', 
-        'image/gif', 
-        'image/webp', 
-        'image/bmp', 
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/bmp',
         'image/tiff',
         'image/svg+xml'
       ];
       const allowedDocumentTypes = ['application/pdf'];
       const allAllowedTypes = [...allowedImageTypes, ...allowedDocumentTypes];
-      
+
       if (!allAllowedTypes.includes(file.type)) {
         showError('Supported formats: JPEG, PNG, GIF, WebP, BMP, TIFF, SVG, PDF');
         return;
       }
-      
+
       // Additional validation for photo fields (only images)
       const photoFields = ['personalPhoto', 'cnicFrontPhoto', 'cnicBackPhoto'];
       if (photoFields.includes(fieldName) && !allowedImageTypes.includes(file.type)) {
         showError('Photos must be in image format (JPEG, PNG, GIF, WebP, BMP, TIFF, SVG)');
         return;
       }
-      
+
       setFiles(prev => ({
         ...prev,
         [fieldName]: file
@@ -222,7 +222,7 @@ function VendorProfileContent() {
 
     try {
       const submitData = new FormData();
-      
+
       // Add form data
       submitData.append('phoneNumber', formData.phoneNumber);
       submitData.append('alternatePhone', formData.alternatePhone);
@@ -231,13 +231,13 @@ function VendorProfileContent() {
       submitData.append('businessCategory', formData.businessCategory);
       submitData.append('businessDescription', formData.businessDescription);
       submitData.append('establishedYear', formData.establishedYear);
-      
+
       // Add nested objects as JSON
       submitData.append('businessAddress', JSON.stringify(formData.businessAddress));
       submitData.append('pickupAddress', JSON.stringify(formData.pickupAddress));
       submitData.append('bankDetails', JSON.stringify(formData.bankDetails));
       submitData.append('taxDetails', JSON.stringify(formData.taxDetails));
-      
+
       // Add files
       Object.keys(files).forEach(key => {
         if (files[key]) {
@@ -438,9 +438,9 @@ function VendorProfileContent() {
                   <div className="space-y-1 text-center">
                     {previews.personalPhoto ? (
                       <div>
-                        <img 
-                          src={previews.personalPhoto} 
-                          alt="Personal" 
+                        <img
+                          src={previews.personalPhoto}
+                          alt="Personal"
                           className="mx-auto h-32 w-32 object-cover rounded-lg"
                         />
                         <p className="text-xs text-gray-500 mt-2">Click to change</p>
@@ -486,9 +486,9 @@ function VendorProfileContent() {
                   <div className="space-y-1 text-center">
                     {previews.cnicFrontPhoto ? (
                       <div>
-                        <img 
-                          src={previews.cnicFrontPhoto} 
-                          alt="CNIC Front" 
+                        <img
+                          src={previews.cnicFrontPhoto}
+                          alt="CNIC Front"
                           className="mx-auto h-32 w-48 object-cover rounded-lg"
                         />
                         <p className="text-xs text-gray-500 mt-2">Click to change</p>
@@ -534,9 +534,9 @@ function VendorProfileContent() {
                   <div className="space-y-1 text-center">
                     {previews.cnicBackPhoto ? (
                       <div>
-                        <img 
-                          src={previews.cnicBackPhoto} 
-                          alt="CNIC Back" 
+                        <img
+                          src={previews.cnicBackPhoto}
+                          alt="CNIC Back"
                           className="mx-auto h-32 w-48 object-cover rounded-lg"
                         />
                         <p className="text-xs text-gray-500 mt-2">Click to change</p>

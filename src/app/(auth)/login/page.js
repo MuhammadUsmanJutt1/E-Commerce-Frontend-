@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { API_BASE_URL } from '@/lib/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import BackgroundEffect from '@/components/ui/BackgroundEffect';
 import { ArrowRight, Loader2 } from 'lucide-react';
@@ -162,7 +163,7 @@ export default function LoginPage() {
                     </div>
 
                     <a
-                        href="http://localhost:3001/auth/google"
+                        href={`${API_BASE_URL}/auth/google`}
                         className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-300"
                     >
                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
