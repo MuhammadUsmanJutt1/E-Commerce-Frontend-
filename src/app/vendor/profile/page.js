@@ -32,32 +32,10 @@ function VendorProfileContent() {
     businessCategory: '',
     businessDescription: '',
     establishedYear: new Date().getFullYear(),
-    businessAddress: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      country: 'Pakistan'
-    },
-    pickupAddress: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      country: 'Pakistan'
-    },
-    bankDetails: {
-      accountHolderName: '',
-      accountNumber: '',
-      bankName: '',
-      ifscCode: '',
-      branchName: ''
-    },
-    taxDetails: {
-      gstNumber: '',
-      panNumber: '',
-      ntnNumber: ''
-    }
+    businessAddress: { street: '', city: '', state: '', zipCode: '', country: 'Pakistan' },
+    pickupAddress: { street: '', city: '', state: '', zipCode: '', country: 'Pakistan' },
+    bankDetails: { accountHolderName: '', accountNumber: '', bankName: '', ifscCode: '', branchName: '' },
+    taxDetails: { gstNumber: '', panNumber: '', ntnNumber: '' }
   });
 
   const [files, setFiles] = useState({
@@ -275,34 +253,34 @@ function VendorProfileContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={() => router.push('/vendor/dashboard')}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-3 sm:mb-4 text-sm sm:text-base"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
             Back to Dashboard
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Vendor Profile</h1>
-          <p className="text-gray-600 mt-2">Update your business information and documents</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Vendor Profile</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">Update your business information and documents</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Personal Information */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-[#B88E2F] rounded-lg">
-                <User className="w-5 h-5 text-white" />
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="p-1.5 sm:p-2 bg-[#B88E2F] rounded-lg">
+                <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Personal Information</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Personal Information</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Primary Phone <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -311,13 +289,13 @@ function VendorProfileContent() {
                   value={formData.phoneNumber}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent text-sm sm:text-base"
                   placeholder="+92 300 1234567"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Alternate Phone
                 </label>
                 <input
@@ -325,13 +303,13 @@ function VendorProfileContent() {
                   name="alternatePhone"
                   value={formData.alternatePhone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent text-sm sm:text-base"
                   placeholder="+92 300 1234567"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   CNIC Number <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -341,13 +319,13 @@ function VendorProfileContent() {
                   onChange={handleInputChange}
                   required
                   maxLength="13"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent text-sm sm:text-base"
                   placeholder="1234567890123"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Date of Birth
                 </label>
                 <input
@@ -355,31 +333,31 @@ function VendorProfileContent() {
                   name="dateOfBirth"
                   value={formData.dateOfBirth}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent text-sm sm:text-base"
                 />
               </div>
             </div>
           </div>
 
           {/* Business Information */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-[#B88E2F] rounded-lg">
-                <Building className="w-5 h-5 text-white" />
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="p-1.5 sm:p-2 bg-[#B88E2F] rounded-lg">
+                <Building className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Business Information</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Business Information</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Business Category
                 </label>
                 <select
                   name="businessCategory"
                   value={formData.businessCategory}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent text-sm sm:text-base bg-white"
                 >
                   <option value="">Select Category</option>
                   {businessCategories.map(category => (
@@ -389,7 +367,7 @@ function VendorProfileContent() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Established Year
                 </label>
                 <input
@@ -399,12 +377,12 @@ function VendorProfileContent() {
                   onChange={handleInputChange}
                   min="1900"
                   max={new Date().getFullYear()}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent text-sm sm:text-base"
                 />
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                   Business Description
                 </label>
                 <textarea
@@ -412,7 +390,7 @@ function VendorProfileContent() {
                   value={formData.businessDescription}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent text-sm sm:text-base resize-none"
                   placeholder="Describe your business..."
                 />
               </div>
@@ -420,15 +398,15 @@ function VendorProfileContent() {
           </div>
 
           {/* Documents Upload */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-[#B88E2F] rounded-lg">
-                <FileText className="w-5 h-5 text-white" />
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="p-1.5 sm:p-2 bg-[#B88E2F] rounded-lg">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900">Documents & Photos</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Documents & Photos</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Personal Photo */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -642,27 +620,27 @@ function VendorProfileContent() {
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end gap-4">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4 pb-4">
             <button
               type="button"
               onClick={() => router.push('/vendor/dashboard')}
-              className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-full sm:w-auto px-6 py-2.5 sm:py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors text-sm sm:text-base"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 bg-[#B88E2F] text-white px-8 py-3 rounded-lg hover:bg-[#d4a574] transition-colors disabled:opacity-50"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#B88E2F] text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg hover:bg-[#d4a574] active:bg-[#9F7A28] transition-colors disabled:opacity-50 text-sm sm:text-base"
             >
               {loading ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
                   Saving...
                 </>
               ) : (
                 <>
-                  <Save size={20} />
+                  <Save size={18} />
                   Save Profile
                 </>
               )}

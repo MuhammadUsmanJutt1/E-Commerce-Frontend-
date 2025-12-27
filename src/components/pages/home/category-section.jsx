@@ -14,11 +14,11 @@ const CategorySection = ({ category, title }) => {
 
     if (loading) {
         return (
-            <section className="py-12 px-4 md:px-8 lg:px-16">
-                <h2 className="text-3xl font-bold text-center text-[#3A3A3A] mb-8">{title}</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <section className="py-8 sm:py-10 lg:py-12 px-4 sm:px-6 md:px-8 lg:px-16">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center text-[#3A3A3A] mb-6 sm:mb-8">{title}</h2>
+                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     {[...Array(4)].map((_, i) => (
-                        <div key={i} className="bg-gray-200 animate-pulse h-[400px] rounded" />
+                        <div key={i} className="bg-gray-200 animate-pulse h-[300px] sm:h-[350px] lg:h-[400px] rounded" />
                     ))}
                 </div>
             </section>
@@ -30,9 +30,9 @@ const CategorySection = ({ category, title }) => {
     }
 
     return (
-        <section className="py-12 px-4 md:px-8 lg:px-16">
-            <h2 className="text-3xl font-bold text-center text-[#3A3A3A] mb-8">{title}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section className="py-8 sm:py-10 lg:py-12 px-4 sm:px-6 md:px-8 lg:px-16">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-center text-[#3A3A3A] mb-6 sm:mb-8">{title}</h2>
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {categoryProducts.map(product => (
                     <Link key={product.id} href={`/shop/${product.id}`}>
                         <Card product={product} />
@@ -40,10 +40,10 @@ const CategorySection = ({ category, title }) => {
                 ))}
             </div>
             {products.filter(p => p.topCategory === category || p.category === category).length > 4 && (
-                <div className="text-center mt-6">
+                <div className="text-center mt-4 sm:mt-6">
                     <Link
                         href={`/shop?category=${category}`}
-                        className="text-[#B88E2F] font-semibold hover:underline"
+                        className="text-[#B88E2F] font-semibold hover:underline text-sm sm:text-base"
                     >
                         Show More {title}
                     </Link>

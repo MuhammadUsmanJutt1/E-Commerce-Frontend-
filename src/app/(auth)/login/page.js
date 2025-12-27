@@ -42,30 +42,30 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="relative min-h-screen flex items-center justify-center bg-gray-50 overflow-hidden px-4 py-12">
+        <div className="relative min-h-screen flex items-center justify-center bg-gray-50 overflow-hidden px-4 py-8 sm:py-12">
             <BackgroundEffect />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20"
+                className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-xl border border-white/20"
             >
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-[#3A3A3A] mb-2">Welcome Back</h1>
-                    <p className="text-[#898989]">Login to your account</p>
+                <div className="text-center mb-6 sm:mb-8">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#3A3A3A] mb-2">Welcome Back</h1>
+                    <p className="text-[#898989] text-sm sm:text-base">Login to your account</p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-6 text-sm text-center">
+                    <div className="bg-red-50 text-red-500 p-3 rounded-lg mb-4 sm:mb-6 text-xs sm:text-sm text-center">
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                     {/* Email */}
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-[#3A3A3A] mb-2">
+                        <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-[#3A3A3A] mb-1.5 sm:mb-2">
                             Email Address
                         </label>
                         <input
@@ -75,14 +75,14 @@ export default function LoginPage() {
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-3 border border-[#9F9F9F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent bg-white/50"
+                            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-[#9F9F9F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent bg-white/50 text-sm sm:text-base"
                             placeholder="Enter your email"
                         />
                     </div>
 
                     {/* Password */}
                     <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-[#3A3A3A] mb-2">
+                        <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-[#3A3A3A] mb-1.5 sm:mb-2">
                             Password
                         </label>
                         <input
@@ -92,13 +92,13 @@ export default function LoginPage() {
                             value={formData.password}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-3 border border-[#9F9F9F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent bg-white/50"
+                            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-[#9F9F9F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] focus:border-transparent bg-white/50 text-sm sm:text-base"
                             placeholder="Enter your password"
                         />
                     </div>
 
                     {/* Remember Me & Forgot Password */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
                         <label className="flex items-center">
                             <input
                                 type="checkbox"
@@ -107,9 +107,9 @@ export default function LoginPage() {
                                 onChange={handleChange}
                                 className="w-4 h-4 text-[#B88E2F] border-[#9F9F9F] rounded focus:ring-[#B88E2F]"
                             />
-                            <span className="ml-2 text-sm text-[#3A3A3A]">Remember me</span>
+                            <span className="ml-2 text-xs sm:text-sm text-[#3A3A3A]">Remember me</span>
                         </label>
-                        <Link href="/forgot-password" className="text-sm text-[#B88E2F] hover:underline">
+                        <Link href="/forgot-password" className="text-xs sm:text-sm text-[#B88E2F] hover:underline">
                             Forgot Password?
                         </Link>
                     </div>
@@ -120,7 +120,7 @@ export default function LoginPage() {
                         whileTap={{ scale: 0.98 }}
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-[#B88E2F] text-white py-3 rounded-lg font-semibold hover:bg-[#9F7A28] transition-colors duration-300 disabled:opacity-50 flex items-center justify-center min-h-[50px]"
+                        className="w-full bg-[#B88E2F] text-white py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-[#9F7A28] transition-colors duration-300 disabled:opacity-50 flex items-center justify-center min-h-[44px] sm:min-h-[50px] text-sm sm:text-base"
                     >
                         <AnimatePresence mode="wait">
                             {loading ? (
@@ -152,25 +152,25 @@ export default function LoginPage() {
                         </AnimatePresence>
                     </motion.button>
 
-                    <div className="relative my-6">
+                    <div className="relative my-4 sm:my-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-gray-300"></div>
                         </div>
-                        <div className="relative flex justify-center text-sm">
+                        <div className="relative flex justify-center text-xs sm:text-sm">
                             <span className="px-2 bg-transparent text-gray-500">Or continue with</span>
                         </div>
                     </div>
 
                     <a
                         href="http://localhost:3001/auth/google"
-                        className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-300"
+                        className="w-full flex items-center justify-center gap-2 sm:gap-3 bg-white border border-gray-300 text-gray-700 py-2.5 sm:py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-300 text-sm sm:text-base"
                     >
-                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-4 h-4 sm:w-5 sm:h-5" />
                         Continue with Google
                     </a>
 
                     {/* Sign Up Link */}
-                    <p className="text-center text-sm text-[#898989]">
+                    <p className="text-center text-xs sm:text-sm text-[#898989]">
                         Don't have an account?{' '}
                         <Link href="/signup" className="text-[#B88E2F] font-semibold hover:underline">
                             Sign Up

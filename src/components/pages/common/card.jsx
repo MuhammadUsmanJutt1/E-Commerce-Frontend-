@@ -63,13 +63,13 @@ const Card = ({ product }) => {
         <div className="group relative bg-[#F4F5F7] overflow-hidden transition-all duration-300 hover:shadow-xl">
             {/* Toast Notification */}
             {showToast && (
-                <div className="fixed top-24 right-4 bg-[#B88E2F] text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-in slide-in-from-top duration-300">
+                <div className="fixed top-20 sm:top-24 right-2 sm:right-4 bg-[#B88E2F] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg shadow-lg z-50 animate-in slide-in-from-top duration-300 text-sm sm:text-base">
                     {toastMessage}
                 </div>
             )}
 
             {/* Image Container */}
-            <div className="relative h-[301px] overflow-hidden">
+            <div className="relative h-[200px] xs:h-[220px] sm:h-[250px] lg:h-[301px] overflow-hidden">
                 <Image
                     src={product.image}
                     alt={product.title}
@@ -78,52 +78,52 @@ const Card = ({ product }) => {
                 />
 
                 {/* Badges */}
-                <div className="absolute top-4 right-4 flex flex-col gap-2">
+                <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex flex-col gap-1 sm:gap-2">
                     {product.discount && (
-                        <span className="bg-[#E97171] text-white rounded-full w-12 h-12 flex items-center justify-center text-sm font-semibold">
+                        <span className="bg-[#E97171] text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center text-[10px] sm:text-xs lg:text-sm font-semibold">
                             -{product.discount}%
                         </span>
                     )}
                     {product.isNew && (
-                        <span className="bg-[#2EC1AC] text-white rounded-full w-12 h-12 flex items-center justify-center text-sm font-semibold">
+                        <span className="bg-[#2EC1AC] text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 flex items-center justify-center text-[10px] sm:text-xs lg:text-sm font-semibold">
                             New
                         </span>
                     )}
                 </div>
 
                 {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-4">
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2 sm:gap-3 lg:gap-4 p-2">
                     <button
                         onClick={handleAddToCart}
-                        className="bg-white text-[#B88E2F] px-12 py-3 font-semibold hover:bg-[#B88E2F] hover:text-white transition-colors duration-300"
+                        className="bg-white text-[#B88E2F] px-4 sm:px-8 lg:px-12 py-2 sm:py-3 font-semibold hover:bg-[#B88E2F] hover:text-white transition-colors duration-300 text-xs sm:text-sm lg:text-base"
                     >
                         Add to cart
                     </button>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-4">
+                    <div className="flex gap-2 sm:gap-3 lg:gap-4 flex-wrap justify-center">
                         <button
                             onClick={handleShare}
                             className="flex items-center gap-1 text-white hover:text-[#B88E2F] transition-colors"
                         >
-                            <Share2 size={16} />
-                            <span className="text-sm font-semibold">Share</span>
+                            <Share2 size={14} className="sm:w-4 sm:h-4" />
+                            <span className="text-[10px] sm:text-xs lg:text-sm font-semibold hidden xs:inline">Share</span>
                         </button>
                         <button
                             onClick={handleCompare}
                             className={`flex items-center gap-1 transition-colors ${isCompared ? 'text-[#B88E2F]' : 'text-white hover:text-[#B88E2F]'
                                 }`}
                         >
-                            <ArrowLeftRight size={16} />
-                            <span className="text-sm font-semibold">Compare</span>
+                            <ArrowLeftRight size={14} className="sm:w-4 sm:h-4" />
+                            <span className="text-[10px] sm:text-xs lg:text-sm font-semibold hidden xs:inline">Compare</span>
                         </button>
                         <button
                             onClick={handleWishlist}
                             className={`flex items-center gap-1 transition-colors ${isLiked ? 'text-red-500' : 'text-white hover:text-red-500'
                                 }`}
                         >
-                            <Heart size={16} fill={isLiked ? 'currentColor' : 'none'} />
-                            <span className="text-sm font-semibold">Like</span>
+                            <Heart size={14} className="sm:w-4 sm:h-4" fill={isLiked ? 'currentColor' : 'none'} />
+                            <span className="text-[10px] sm:text-xs lg:text-sm font-semibold hidden xs:inline">Like</span>
                         </button>
                     </div>
                     
@@ -135,7 +135,7 @@ const Card = ({ product }) => {
                                 e.stopPropagation();
                                 window.open(`/shop/vendor/${product.vendor}`, '_blank');
                             }}
-                            className="bg-[#B88E2F] text-white px-8 py-2 text-sm font-semibold hover:bg-[#d4a574] transition-colors duration-300"
+                            className="bg-[#B88E2F] text-white px-4 sm:px-6 lg:px-8 py-1.5 sm:py-2 text-[10px] sm:text-xs lg:text-sm font-semibold hover:bg-[#d4a574] transition-colors duration-300"
                         >
                             Visit Shop
                         </button>
@@ -144,16 +144,16 @@ const Card = ({ product }) => {
             </div>
 
             {/* Product Info */}
-            <div className="p-4">
-                <h3 className="text-2xl font-semibold text-[#3A3A3A] mb-2">{product.title}</h3>
-                <p className="text-[#898989] text-base mb-3">{product.subtitle}</p>
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <span className="text-xl font-semibold text-[#3A3A3A]">
+            <div className="p-3 sm:p-4">
+                <h3 className="text-base sm:text-lg lg:text-2xl font-semibold text-[#3A3A3A] mb-1 sm:mb-2 line-clamp-1">{product.title}</h3>
+                <p className="text-[#898989] text-xs sm:text-sm lg:text-base mb-2 sm:mb-3 line-clamp-1">{product.subtitle}</p>
+                <div className="flex items-center justify-between flex-wrap gap-1">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="text-sm sm:text-base lg:text-xl font-semibold text-[#3A3A3A]">
                             Rp {product.price.toLocaleString()}
                         </span>
                         {product.originalPrice && (
-                            <span className="text-base text-[#B0B0B0] line-through">
+                            <span className="text-xs sm:text-sm lg:text-base text-[#B0B0B0] line-through">
                                 Rp {product.originalPrice.toLocaleString()}
                             </span>
                         )}
