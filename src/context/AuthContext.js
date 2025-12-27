@@ -21,11 +21,11 @@ export const AuthProvider = ({ children }) => {
             const token = localStorage.getItem('accessToken');
             if (token) {
                 const { data } = await api.get('/auth/me');
-                console.log('🔍 AuthContext - User data from /auth/me:', data);
                 setUser(data);
             }
         } catch (error) {
-            console.error('Session check failed:', error);
+            // Silently handle auth errors - just clear tokens and set user to null
+            // This is expected when tokens are expired or invalid
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             setUser(null);
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
             setUser(data);
             return data;
         } catch (error) {
-            console.error('Failed to refresh user data:', error);
+            // Silently fail - user data refresh is not critical
             return null;
         }
     };
@@ -61,13 +61,11 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('refreshToken', data.refreshToken);
             setUser(data.user);
-            console.log('🔍 AuthContext - User data from login:', data.user);
 
             // Redirect based on user role and approval status
             if (data.user.role === 'admin') {
                 router.push('/admin');
             } else if (data.user.role === 'vendor') {
-                console.log('🔍 AuthContext - Vendor isApproved:', data.user.isApproved);
                 if (data.user.isApproved) {
                     router.push('/vendor/dashboard');
                 } else {
@@ -79,7 +77,6 @@ export const AuthProvider = ({ children }) => {
 
             return { success: true };
         } catch (error) {
-            console.error('Login failed:', error);
             // Clear any tokens on login failure
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
@@ -99,7 +96,6 @@ export const AuthProvider = ({ children }) => {
             setUser(data.user);
             return { success: true, requiresVerification: !data.user.isEmailVerified, email: userData.email };
         } catch (error) {
-            console.error('Registration failed:', error);
             return {
                 success: false,
                 error: error.response?.data?.message || 'Registration failed'
@@ -134,16 +130,24 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        try {
-            await api.post('/auth/logout');
-        } catch (error) {
-            console.error('Logout error:', error);
-        } finally {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            setUser(null);
-            router.push('/login');
+        // Clear tokens first to prevent interceptor issues
+        const token = localStorage.getItem('accessToken');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        setUser(null);
+
+        // Try to notify backend (fire and forget, use axios directly to bypass interceptor)
+        if (token) {
+            try {
+                await axios.post(`${API_BASE_URL}/auth/logout`, {}, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+            } catch (error) {
+                // Ignore errors - user is already logged out client-side
+            }
         }
+
+        router.push('/login');
     };
 
     return (

@@ -113,17 +113,17 @@ export default function SingleProductPage() {
             </div>
 
             {/* Product Section */}
-            <div className="container mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+            <div className="container mx-auto px-4 py-6 sm:py-8 lg:py-12">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-12 lg:mb-16">
                     {/* Left: Image Gallery */}
-                    <div className="flex gap-4">
+                    <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
                         {/* Thumbnails */}
-                        <div className="flex flex-col gap-4">
+                        <div className="flex sm:flex-col gap-2 sm:gap-4 overflow-x-auto sm:overflow-visible pb-2 sm:pb-0">
                             {thumbnails.map((img, index) => (
                                 <div
                                     key={index}
                                     onClick={() => setSelectedImage(index)}
-                                    className={`w-20 h-20 bg-[#F9F1E7] rounded-lg overflow-hidden cursor-pointer ${selectedImage === index ? 'ring-2 ring-[#B88E2F]' : ''
+                                    className={`w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-[#F9F1E7] rounded-lg overflow-hidden cursor-pointer ${selectedImage === index ? 'ring-2 ring-[#B88E2F]' : ''
                                         }`}
                                 >
                                     <Image src={img} alt={`Thumbnail ${index + 1}`} width={80} height={80} className="object-cover w-full h-full" />
@@ -133,41 +133,41 @@ export default function SingleProductPage() {
 
                         {/* Main Image */}
                         <div className="flex-1 bg-[#F9F1E7] rounded-lg overflow-hidden">
-                            <div className="relative w-full h-[500px]">
-                                <Image src={thumbnails[selectedImage]} alt={product.title} fill className="object-contain p-8" />
+                            <div className="relative w-full h-[300px] sm:h-[400px] lg:h-[500px]">
+                                <Image src={thumbnails[selectedImage]} alt={product.title} fill className="object-contain p-4 sm:p-6 lg:p-8" />
                             </div>
                         </div>
                     </div>
 
                     {/* Right: Product Details */}
                     <div>
-                        <h1 className="text-4xl font-normal text-gray-900 mb-2">{product.title}</h1>
-                        <p className="text-2xl text-[#9F9F9F] mb-4">Rs. {product.price.toLocaleString()}</p>
+                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-normal text-gray-900 mb-2">{product.title}</h1>
+                        <p className="text-lg sm:text-xl lg:text-2xl text-[#9F9F9F] mb-3 sm:mb-4">Rs. {product.price.toLocaleString()}</p>
 
                         {/* Rating */}
-                        <div className="flex items-center gap-4 mb-4 pb-4 border-b border-gray-200">
-                            <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 pb-3 sm:pb-4 border-b border-gray-200">
+                            <div className="flex items-center gap-0.5 sm:gap-1">
                                 {[1, 2, 3, 4, 5].map((star) => (
-                                    <Star key={star} size={20} className="fill-[#FFC700] text-[#FFC700]" />
+                                    <Star key={star} size={16} className="sm:w-5 sm:h-5 fill-[#FFC700] text-[#FFC700]" />
                                 ))}
                             </div>
-                            <span className="text-sm text-gray-500">5 Customer Review</span>
+                            <span className="text-xs sm:text-sm text-gray-500">5 Customer Review</span>
                         </div>
 
                         {/* Description */}
-                        <p className="text-gray-600 mb-6 leading-relaxed">
+                        <p className="text-gray-600 mb-4 sm:mb-6 leading-relaxed text-sm sm:text-base">
                             {product.description || 'Setting the bar as one of the loudest speakers in its class, the Kilburn is a compact, stout-hearted hero with a well-balanced audio which boasts a clear midrange and extended highs for a sound.'}
                         </p>
 
                         {/* Size Selection */}
-                        <div className="mb-6">
-                            <p className="text-sm text-gray-500 mb-3">Size</p>
-                            <div className="flex gap-3 flex-wrap">
+                        <div className="mb-4 sm:mb-6">
+                            <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3">Size</p>
+                            <div className="flex gap-2 sm:gap-3 flex-wrap">
                                 {(product.sizes && product.sizes.length > 0 ? product.sizes : sizes).map((size) => (
                                     <button
                                         key={size}
                                         onClick={() => setSelectedSize(size)}
-                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${selectedSize === size
+                                        className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${selectedSize === size
                                             ? 'bg-[#B88E2F] text-white'
                                             : 'bg-[#F9F1E7] text-gray-900 hover:bg-[#B88E2F] hover:text-white'
                                             }`}
@@ -179,9 +179,9 @@ export default function SingleProductPage() {
                         </div>
 
                         {/* Color Selection */}
-                        <div className="mb-6">
-                            <p className="text-sm text-gray-500 mb-3">Color</p>
-                            <div className="flex gap-3 flex-wrap">
+                        <div className="mb-4 sm:mb-6">
+                            <p className="text-xs sm:text-sm text-gray-500 mb-2 sm:mb-3">Color</p>
+                            <div className="flex gap-2 sm:gap-3 flex-wrap">
                                 {(product.colors && product.colors.length > 0 ? product.colors : colors.map(c => c.name)).map((color, index) => {
                                     const colorClass = typeof color === 'string' ? 
                                         (color.toLowerCase() === 'black' ? 'bg-black' :
@@ -202,7 +202,7 @@ export default function SingleProductPage() {
                                         <button
                                             key={colorName}
                                             onClick={() => setSelectedColor(colorName)}
-                                            className={`w-10 h-10 rounded-full ${colorClass} ${selectedColor === colorName ? 'ring-2 ring-offset-2 ring-gray-900' : ''
+                                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${colorClass} ${selectedColor === colorName ? 'ring-2 ring-offset-2 ring-gray-900' : ''
                                                 }`}
                                             title={colorName}
                                         />
@@ -212,11 +212,11 @@ export default function SingleProductPage() {
                         </div>
 
                         {/* Quantity and Actions */}
-                        <div className="flex gap-4 mb-8 pb-8 border-b border-gray-200">
-                            <div className="flex items-center border border-gray-300 rounded-lg">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-200">
+                            <div className="flex items-center border border-gray-300 rounded-lg w-fit">
                                 <button
                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="px-4 py-3 text-gray-900 hover:bg-gray-100"
+                                    className="px-3 sm:px-4 py-2 sm:py-3 text-gray-900 hover:bg-gray-100 text-sm sm:text-base"
                                 >
                                     -
                                 </button>
@@ -224,77 +224,79 @@ export default function SingleProductPage() {
                                     type="text"
                                     value={quantity}
                                     readOnly
-                                    className="w-16 text-center outline-none bg-transparent text-gray-900"
+                                    className="w-12 sm:w-16 text-center outline-none bg-transparent text-gray-900 text-sm sm:text-base"
                                 />
                                 <button
                                     onClick={() => setQuantity(quantity + 1)}
-                                    className="px-4 py-3 text-gray-900 hover:bg-gray-100"
+                                    className="px-3 sm:px-4 py-2 sm:py-3 text-gray-900 hover:bg-gray-100 text-sm sm:text-base"
                                 >
                                     +
                                 </button>
                             </div>
 
-                            <button
-                                onClick={handleAddToCart}
-                                className="flex-1 px-8 py-3 border border-gray-900 rounded-lg text-gray-900 hover:bg-gray-900 hover:text-white transition-colors"
-                            >
-                                Add To Cart
-                            </button>
+                            <div className="flex gap-2 sm:gap-4 flex-1">
+                                <button
+                                    onClick={handleAddToCart}
+                                    className="flex-1 px-4 sm:px-8 py-2 sm:py-3 border border-gray-900 rounded-lg text-gray-900 hover:bg-gray-900 hover:text-white transition-colors text-sm sm:text-base"
+                                >
+                                    Add To Cart
+                                </button>
 
-                            <button
-                                onClick={() => toggleWishlist(product)}
-                                className={`px-8 py-3 border rounded-lg transition-colors flex items-center gap-2 ${isWishlisted
-                                    ? 'border-[#B88E2F] text-[#B88E2F] bg-[#B88E2F]/10'
-                                    : 'border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white'
-                                    }`}
-                            >
-                                <Heart size={20} className={isWishlisted ? 'fill-current' : ''} />
-                                {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
-                            </button>
+                                <button
+                                    onClick={() => toggleWishlist(product)}
+                                    className={`px-4 sm:px-6 py-2 sm:py-3 border rounded-lg transition-colors flex items-center gap-1 sm:gap-2 text-sm sm:text-base ${isWishlisted
+                                        ? 'border-[#B88E2F] text-[#B88E2F] bg-[#B88E2F]/10'
+                                        : 'border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white'
+                                        }`}
+                                >
+                                    <Heart size={18} className={`sm:w-5 sm:h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+                                    <span className="hidden sm:inline">{isWishlisted ? 'Wishlisted' : 'Wishlist'}</span>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Meta Information */}
-                        <div className="space-y-3 text-sm">
-                            <div className="flex gap-3">
-                                <span className="text-gray-500 w-24">SKU</span>
+                        <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                            <div className="flex gap-2 sm:gap-3">
+                                <span className="text-gray-500 w-20 sm:w-24">SKU</span>
                                 <span className="text-gray-900">: {product.sku || 'N/A'}</span>
                             </div>
-                            <div className="flex gap-3">
-                                <span className="text-gray-500 w-24">Brand</span>
+                            <div className="flex gap-2 sm:gap-3">
+                                <span className="text-gray-500 w-20 sm:w-24">Brand</span>
                                 <span className="text-gray-900">: {product.brand || 'N/A'}</span>
                             </div>
-                            <div className="flex gap-3">
-                                <span className="text-gray-500 w-24">Category</span>
+                            <div className="flex gap-2 sm:gap-3">
+                                <span className="text-gray-500 w-20 sm:w-24">Category</span>
                                 <span className="text-gray-900">: {product.topCategory || product.category}</span>
                             </div>
-                            <div className="flex gap-3">
-                                <span className="text-gray-500 w-24">Sub Category</span>
+                            <div className="flex gap-2 sm:gap-3">
+                                <span className="text-gray-500 w-20 sm:w-24">Sub Category</span>
                                 <span className="text-gray-900">: {product.subCategory || 'N/A'}</span>
                             </div>
-                            <div className="flex gap-3">
-                                <span className="text-gray-500 w-24">Material</span>
+                            <div className="flex gap-2 sm:gap-3">
+                                <span className="text-gray-500 w-20 sm:w-24">Material</span>
                                 <span className="text-gray-900">: {product.material || 'N/A'}</span>
                             </div>
-                            <div className="flex gap-3">
-                                <span className="text-gray-500 w-24">Stock</span>
+                            <div className="flex gap-2 sm:gap-3">
+                                <span className="text-gray-500 w-20 sm:w-24">Stock</span>
                                 <span className="text-gray-900">: {product.stock || 0} pieces</span>
                             </div>
-                            <div className="flex gap-3">
-                                <span className="text-gray-500 w-24">Tags</span>
+                            <div className="flex gap-2 sm:gap-3">
+                                <span className="text-gray-500 w-20 sm:w-24">Tags</span>
                                 <span className="text-gray-900">: {product.tags ? product.tags.join(', ') : (product.isNew ? 'New' : '') + (product.isFeatured ? ', Featured' : '')}</span>
                             </div>
                             {product.vendor && (
-                                <div className="flex gap-3">
-                                    <span className="text-gray-500 w-24">Vendor</span>
+                                <div className="flex gap-2 sm:gap-3">
+                                    <span className="text-gray-500 w-20 sm:w-24">Vendor</span>
                                     <span className="text-gray-900">: {product.vendor.businessName || product.vendor.shopName || 'StyleHub'}</span>
                                 </div>
                             )}
-                            <div className="flex gap-3 items-center">
-                                <span className="text-gray-500 w-24">Share</span>
-                                <div className="flex gap-4">
-                                    <Facebook size={20} className="text-gray-900 cursor-pointer hover:text-[#B88E2F]" />
-                                    <Linkedin size={20} className="text-gray-900 cursor-pointer hover:text-[#B88E2F]" />
-                                    <Twitter size={20} className="text-gray-900 cursor-pointer hover:text-[#B88E2F]" />
+                            <div className="flex gap-2 sm:gap-3 items-center">
+                                <span className="text-gray-500 w-20 sm:w-24">Share</span>
+                                <div className="flex gap-3 sm:gap-4">
+                                    <Facebook size={18} className="sm:w-5 sm:h-5 text-gray-900 cursor-pointer hover:text-[#B88E2F]" />
+                                    <Linkedin size={18} className="sm:w-5 sm:h-5 text-gray-900 cursor-pointer hover:text-[#B88E2F]" />
+                                    <Twitter size={18} className="sm:w-5 sm:h-5 text-gray-900 cursor-pointer hover:text-[#B88E2F]" />
                                 </div>
                             </div>
                         </div>
@@ -302,11 +304,11 @@ export default function SingleProductPage() {
                 </div>
 
                 {/* Tabs Section */}
-                <div className="border-t border-gray-200 pt-12 mb-16">
-                    <div className="flex justify-center gap-12 mb-8">
+                <div className="border-t border-gray-200 pt-8 sm:pt-10 lg:pt-12 mb-8 sm:mb-12 lg:mb-16">
+                    <div className="flex justify-center gap-4 sm:gap-8 lg:gap-12 mb-6 sm:mb-8 overflow-x-auto pb-2">
                         <button
                             onClick={() => setActiveTab('description')}
-                            className={`text-lg pb-2 ${activeTab === 'description'
+                            className={`text-sm sm:text-base lg:text-lg pb-2 whitespace-nowrap ${activeTab === 'description'
                                 ? 'text-gray-900 border-b-2 border-gray-900'
                                 : 'text-gray-500'
                                 }`}
@@ -315,16 +317,16 @@ export default function SingleProductPage() {
                         </button>
                         <button
                             onClick={() => setActiveTab('additional')}
-                            className={`text-lg pb-2 ${activeTab === 'additional'
+                            className={`text-sm sm:text-base lg:text-lg pb-2 whitespace-nowrap ${activeTab === 'additional'
                                 ? 'text-gray-900 border-b-2 border-gray-900'
                                 : 'text-gray-500'
                                 }`}
                         >
-                            Additional Information
+                            Additional Info
                         </button>
                         <button
                             onClick={() => setActiveTab('reviews')}
-                            className={`text-lg pb-2 ${activeTab === 'reviews'
+                            className={`text-sm sm:text-base lg:text-lg pb-2 whitespace-nowrap ${activeTab === 'reviews'
                                 ? 'text-gray-900 border-b-2 border-gray-900'
                                 : 'text-gray-500'
                                 }`}
