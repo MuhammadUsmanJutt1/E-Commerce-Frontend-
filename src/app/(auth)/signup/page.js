@@ -294,7 +294,7 @@ export default function SignUpPage() {
                         />
                         <span className="ml-2 text-sm text-[#3A3A3A]">
                             I agree to the{' '}
-                            <Link href="/terms" className="text-[#B88E2F] hover:underline">
+                            <Link href="/terms-conditions" className="text-[#B88E2F] hover:underline">
                                 Terms & Conditions
                             </Link>
                         </span>

@@ -8,6 +8,8 @@ import Footer from '@/components/footer/footer';
 import Breadcrumb from '@/components/pages/common/breadcrumb';
 import { useCart } from '@/context/CartContext';
 import api from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
+import { MapPin, Loader2 } from 'lucide-react';
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -17,7 +19,7 @@ export default function CheckoutPage() {
         firstName: '',
         lastName: '',
         companyName: '',
-        country: 'Indonesia',
+        country: 'Pakistan',
         streetAddress: '',
         city: '',
         province: '',
@@ -28,9 +30,88 @@ export default function CheckoutPage() {
         paymentMethod: 'cod'
     });
 
+    const { user } = useAuth();
+
+    // Redirect if not logged in
+    React.useEffect(() => {
+        if (!user && !localStorage.getItem('accessToken')) {
+            showError('Please login to checkout');
+            router.push('/login');
+        }
+    }, [user, router, showError]);
+
+    const [loadingLocation, setLoadingLocation] = useState(false);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleUseLocation = () => {
+        if (!navigator.geolocation) {
+            showError("Geolocation is not supported by your browser");
+            return;
+        }
+
+        setLoadingLocation(true);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                    );
+                    const data = await response.json();
+
+                    if (data.address) {
+                        const address = data.address;
+                        // Improved St/Street and Province mapping
+                        const streetComp = [
+                            address.road,
+                            address.street,
+                            address.house_number,
+                            address.suburb,
+                            address.neighbourhood
+                        ].filter(Boolean).join(', ');
+
+                        const cityComp = address.city || address.town || address.village || address.county || '';
+
+                        setFormData(prev => ({
+                            ...prev,
+                            streetAddress: streetComp || prev.streetAddress,
+                            city: cityComp,
+                            province: address.state || address.region || address.province || '', // Added 'province' check
+                            zipCode: address.postcode || '',
+                            country: 'Pakistan' // Force Pakistan for now as requested or check address.country
+                        }));
+                        showSuccess("Address updated from your location!");
+                    }
+                } catch (error) {
+                    console.error("Error fetching address:", error);
+                    showError("Failed to fetch address details");
+                } finally {
+                    setLoadingLocation(false);
+                }
+            },
+            (error) => {
+                console.error("Geolocation error:", error);
+                setLoadingLocation(false);
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        showError("Location permission denied. Please enable it in browser settings.");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        showError("Location information is unavailable.");
+                        break;
+                    case error.TIMEOUT:
+                        showError("The request to get user location timed out.");
+                        break;
+                    default:
+                        showError("An unknown error occurred.");
+                        break;
+                }
+            }
+        );
     };
 
     const [couponCode, setCouponCode] = useState('');
@@ -68,6 +149,13 @@ export default function CheckoutPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!user) {
+            showError("Please login to place an order");
+            router.push('/login');
+            return;
+        }
+
         try {
             await api.post('/orders', {
                 shippingAddress: {
@@ -92,7 +180,12 @@ export default function CheckoutPage() {
             showSuccess('Order placed successfully!');
         } catch (error) {
             console.error('Order failed:', error);
-            showError(error.response?.data?.message || 'Failed to place order. Please make sure you are logged in.');
+            if (error.response?.status === 401) {
+                showError('Session expired. Please login again.');
+                router.push('/login');
+            } else {
+                showError(error.response?.data?.message || 'Failed to place order.');
+            }
         }
     };
 
@@ -136,7 +229,23 @@ export default function CheckoutPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                         {/* Billing Details */}
                         <div>
-                            <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-[#3A3A3A] mb-6 sm:mb-8">Billing details</h2>
+                            <div className="flex justify-between items-center mb-6 sm:mb-8">
+                                <h2 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-[#3A3A3A]">Billing details</h2>
+                                <button
+                                    type="button"
+                                    onClick={handleUseLocation}
+                                    disabled={loadingLocation}
+                                    className="flex items-center gap-2 text-[#B88E2F] hover:bg-[#B88E2F]/10 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium"
+                                >
+                                    {loadingLocation ? (
+                                        <Loader2 size={16} className="animate-spin" />
+                                    ) : (
+                                        <MapPin size={16} />
+                                    )}
+                                    Use Current Location
+                                </button>
+                            </div>
+
                             <div className="space-y-4 sm:space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                     <div>
@@ -190,6 +299,7 @@ export default function CheckoutPage() {
                                         onChange={handleChange}
                                         className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-[#9F9F9F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B88E2F] text-sm sm:text-base"
                                     >
+                                        <option value="Pakistan">Pakistan</option>
                                         <option value="Indonesia">Indonesia</option>
                                         <option value="Malaysia">Malaysia</option>
                                         <option value="Singapore">Singapore</option>

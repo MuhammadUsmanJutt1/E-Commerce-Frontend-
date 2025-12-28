@@ -7,7 +7,7 @@ import api from '@/lib/api';
 import Navbar from '@/components/nav-bar/nav-bar';
 import Footer from '@/components/footer/footer';
 import AddressCard from '@/components/pages/profile/address-card';
-import { Package, User, MapPin, CreditCard, ChevronRight, Box, Plus } from 'lucide-react';
+import { Package, User, MapPin, CreditCard, ChevronRight, Box, Plus, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
@@ -27,6 +27,115 @@ export default function ProfilePage() {
         zipCode: '',
         isDefault: false
     });
+
+    const [loadingLocation, setLoadingLocation] = useState(false);
+
+    const handleUseLocation = () => {
+        if (!navigator.geolocation) {
+            toast.error("Geolocation is not supported by your browser");
+            return;
+        }
+
+        setLoadingLocation(true);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                    );
+                    const data = await response.json();
+
+                    if (data.address) {
+                        const address = data.address;
+
+                        const streetComp = [
+                            address.road,
+                            address.street,
+                            address.house_number,
+                            address.suburb,
+                            address.neighbourhood
+                        ].filter(Boolean).join(', ');
+
+                        const cityComp = address.city || address.town || address.village || address.county || '';
+
+                        setNewAddress(prev => ({
+                            ...prev,
+                            streetAddress: streetComp || prev.streetAddress,
+                            city: cityComp,
+                            province: address.state || address.region || address.province || '',
+                            zipCode: address.postcode || ''
+                        }));
+                        toast.success("Address updated from your location!");
+                    }
+                } catch (error) {
+                    console.error("Error fetching address:", error);
+                    toast.error("Failed to fetch address details");
+                } finally {
+                    setLoadingLocation(false);
+                }
+            },
+            (error) => {
+                console.error("Geolocation error:", error);
+                setLoadingLocation(false);
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        toast.error("Location permission denied");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        toast.error("Location unavailable");
+                        break;
+                    case error.TIMEOUT:
+                        toast.error("Location request timed out");
+                        break;
+                    default:
+                        toast.error("An unknown error occurred");
+                        break;
+                }
+            }
+        );
+    };
+
+    // Edit Profile State
+    const [editingField, setEditingField] = useState(null); // 'name', 'email', 'password'
+    const [editData, setEditData] = useState({});
+    const [passwordData, setPasswordData] = useState({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+
+    const startEditing = (field) => {
+        setEditingField(field);
+        if (field === 'name') setEditData({ name: user.name });
+        if (field === 'email') setEditData({ email: user.email });
+        if (field === 'password') setPasswordData({ currentPassword: '', newPassword: '', confirmNewPassword: '' });
+    };
+
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        try {
+            const { data } = await api.patch('/auth/profile', editData);
+            await refreshUser();
+            setEditingField(null);
+            toast.success('Profile updated successfully');
+        } catch (error) {
+            console.error('Failed to update profile:', error);
+            toast.error(error.response?.data?.message || 'Failed to update profile');
+        }
+    };
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+            toast.error('New passwords do not match');
+            return;
+        }
+        try {
+            await api.post('/auth/change-password', passwordData);
+            setEditingField(null);
+            toast.success('Password changed successfully');
+        } catch (error) {
+            console.error('Failed to change password:', error);
+            toast.error(error.response?.data?.message || 'Failed to change password');
+        }
+    };
 
     useEffect(() => {
         if (!authLoading && !user) {
@@ -201,11 +310,11 @@ export default function ProfilePage() {
                                                     </div>
                                                     <div>
                                                         <p className="text-xs text-gray-500 uppercase mb-1">Total</p>
-                                                        <p className="text-sm font-medium text-gray-900">Rp {order.totalAmount.toLocaleString()}</p>
+                                                        <p className="text-sm font-medium text-gray-900">Rp {(order.totalAmount || 0).toLocaleString()}</p>
                                                     </div>
                                                     <div>
                                                         <p className="text-xs text-gray-500 uppercase mb-1">Ship To</p>
-                                                        <p className="text-sm font-medium text-gray-900">{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
+                                                        <p className="text-sm font-medium text-gray-900">{order.shippingAddress?.firstName} {order.shippingAddress?.lastName}</p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
@@ -231,7 +340,7 @@ export default function ProfilePage() {
                                                         <div className="flex-1">
                                                             <h4 className="font-medium text-gray-900 mb-1">Product ID: {item.product}</h4>
                                                             <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                                                            <p className="text-sm text-gray-500">Price: Rp {item.price.toLocaleString()}</p>
+                                                            <p className="text-sm text-gray-500">Price: Rp {(item.price || 0).toLocaleString()}</p>
                                                         </div>
                                                         <button className="text-[#B88E2F] text-sm font-medium hover:underline">
                                                             Buy it again
@@ -246,7 +355,7 @@ export default function ProfilePage() {
                         )}
 
                         {activeTab === 'profile' && (
-                            <div className="bg-white rounded-lg border border-gray-200 p-8">
+                            <div className="bg-white rounded-lg border border-gray-200 p-8 relative">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Login & Security</h2>
                                 <div className="space-y-6 max-w-xl">
                                     <div className="flex justify-between items-center py-4 border-b border-gray-100">
@@ -254,23 +363,106 @@ export default function ProfilePage() {
                                             <p className="text-sm font-medium text-gray-900">Name</p>
                                             <p className="text-gray-600">{user.name}</p>
                                         </div>
-                                        <button className="text-[#B88E2F] hover:underline text-sm">Edit</button>
+                                        <button onClick={() => startEditing('name')} className="text-[#B88E2F] hover:underline text-sm">Edit</button>
                                     </div>
                                     <div className="flex justify-between items-center py-4 border-b border-gray-100">
                                         <div>
                                             <p className="text-sm font-medium text-gray-900">Email</p>
                                             <p className="text-gray-600">{user.email}</p>
                                         </div>
-                                        <button className="text-[#B88E2F] hover:underline text-sm">Edit</button>
+                                        <button onClick={() => startEditing('email')} className="text-[#B88E2F] hover:underline text-sm">Edit</button>
                                     </div>
                                     <div className="flex justify-between items-center py-4 border-b border-gray-100">
                                         <div>
                                             <p className="text-sm font-medium text-gray-900">Password</p>
                                             <p className="text-gray-600">********</p>
                                         </div>
-                                        <button className="text-[#B88E2F] hover:underline text-sm">Change</button>
+                                        <button onClick={() => startEditing('password')} className="text-[#B88E2F] hover:underline text-sm">Change</button>
                                     </div>
                                 </div>
+
+                                {/* Edit Name Modal */}
+                                {editingField === 'name' && (
+                                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                                        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                                            <h3 className="text-lg font-bold mb-4">Edit Name</h3>
+                                            <form onSubmit={handleUpdateProfile}>
+                                                <input
+                                                    type="text"
+                                                    value={editData.name || ''}
+                                                    onChange={e => setEditData({ ...editData, name: e.target.value })}
+                                                    className="w-full px-3 py-2 border rounded-md mb-4"
+                                                    required
+                                                />
+                                                <div className="flex justify-end gap-3">
+                                                    <button type="button" onClick={() => setEditingField(null)} className="px-4 py-2 text-gray-600">Cancel</button>
+                                                    <button type="submit" className="px-4 py-2 bg-[#B88E2F] text-white rounded-md">Save</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Edit Email Modal */}
+                                {editingField === 'email' && (
+                                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                                        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                                            <h3 className="text-lg font-bold mb-4">Edit Email</h3>
+                                            <form onSubmit={handleUpdateProfile}>
+                                                <input
+                                                    type="email"
+                                                    value={editData.email || ''}
+                                                    onChange={e => setEditData({ ...editData, email: e.target.value })}
+                                                    className="w-full px-3 py-2 border rounded-md mb-4"
+                                                    required
+                                                />
+                                                <div className="flex justify-end gap-3">
+                                                    <button type="button" onClick={() => setEditingField(null)} className="px-4 py-2 text-gray-600">Cancel</button>
+                                                    <button type="submit" className="px-4 py-2 bg-[#B88E2F] text-white rounded-md">Save</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Change Password Modal */}
+                                {editingField === 'password' && (
+                                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                                        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                                            <h3 className="text-lg font-bold mb-4">Change Password</h3>
+                                            <form onSubmit={handleChangePassword}>
+                                                <input
+                                                    type="password"
+                                                    placeholder="Current Password"
+                                                    value={passwordData.currentPassword}
+                                                    onChange={e => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                                                    className="w-full px-3 py-2 border rounded-md mb-3"
+                                                    required
+                                                />
+                                                <input
+                                                    type="password"
+                                                    placeholder="New Password"
+                                                    value={passwordData.newPassword}
+                                                    onChange={e => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                                    className="w-full px-3 py-2 border rounded-md mb-3"
+                                                    required
+                                                />
+                                                <input
+                                                    type="password"
+                                                    placeholder="Confirm New Password"
+                                                    value={passwordData.confirmNewPassword}
+                                                    onChange={e => setPasswordData({ ...passwordData, confirmNewPassword: e.target.value })}
+                                                    className="w-full px-3 py-2 border rounded-md mb-4"
+                                                    required
+                                                />
+                                                <div className="flex justify-end gap-3">
+                                                    <button type="button" onClick={() => setEditingField(null)} className="px-4 py-2 text-gray-600">Cancel</button>
+                                                    <button type="submit" className="px-4 py-2 bg-[#B88E2F] text-white rounded-md">Save</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -291,7 +483,22 @@ export default function ProfilePage() {
 
                                 {showAddAddress ? (
                                     <div className="bg-white rounded-lg border border-gray-200 p-6">
-                                        <h3 className="text-lg font-bold text-gray-900 mb-4">Add New Address</h3>
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="text-lg font-bold text-gray-900">Add New Address</h3>
+                                            <button
+                                                type="button"
+                                                onClick={handleUseLocation}
+                                                disabled={loadingLocation}
+                                                className="flex items-center gap-2 text-[#B88E2F] hover:bg-[#B88E2F]/10 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium"
+                                            >
+                                                {loadingLocation ? (
+                                                    <Loader2 size={16} className="animate-spin" />
+                                                ) : (
+                                                    <MapPin size={16} />
+                                                )}
+                                                Use Current Location
+                                            </button>
+                                        </div>
                                         <form onSubmit={handleAddAddress} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>

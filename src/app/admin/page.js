@@ -909,7 +909,7 @@ function AdminDashboardContent() {
                                   </div>
                                 </td>
                                 <td className="px-4 py-4 text-sm text-gray-900">
-                                  ${product.price}
+                                  ${product.price || 0}
                                   {product.originalPrice && (
                                     <span className="text-gray-500 line-through ml-2">${product.originalPrice}</span>
                                   )}
